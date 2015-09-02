@@ -22,7 +22,7 @@ public class JsoupConvertor implements Converter {
 
 	@Override
 	public TypedOutput toBody(Object object) {
-		throw new RuntimeException("Not implemented");
+		throw new RuntimeException("Convertion to body can't be for JSoupConvertor");
 	}
 
 }

@@ -11,10 +11,25 @@ import retrofit.mime.TypedOutput;
 
 public class JsoupConvertor implements Converter {
 
+	private final JsoupMapper jsoupMapper;
+
+	public JsoupConvertor() {
+		jsoupMapper = new JsoupMapper();
+	}
+
+	public JsoupConvertor(String encoding) {
+		this();
+		this.setEncoding(encoding);
+	}
+
+	public void setEncoding(String encoding) {
+		jsoupMapper.setEncoding(encoding);
+	}
+
 	@Override
 	public Object fromBody(TypedInput body, Type type) throws ConversionException {
 		try {
-			return new JsoupMapper().fromBody(body.in(), type);
+			return jsoupMapper.fromBody(body.in(), type);
 		} catch (IOException e) {
 			throw new RuntimeException("Error occurs at conversion", e);
 		}

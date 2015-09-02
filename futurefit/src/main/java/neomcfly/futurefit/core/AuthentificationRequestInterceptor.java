@@ -1,4 +1,4 @@
-package fr.free.neomcfly.futurefit.core;
+package neomcfly.futurefit.core;
 
 import retrofit.RequestInterceptor;
 

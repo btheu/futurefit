@@ -6,7 +6,7 @@
 		<artifactId>parent</artifactId>
 		<version>1.13</version>
 	</parent>
-	<groupId>fr.free.neomcfly.futurefit</groupId>
+	<groupId>neomcfly.futurefit</groupId>
 	<artifactId>futurefit</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 

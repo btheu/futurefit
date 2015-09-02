@@ -1,8 +1,12 @@
-package fr.free.neomcfly.futurefit;
+package neomcfly.futurefit;
 
 import java.lang.reflect.Proxy;
 import java.util.concurrent.Executor;
 
+import neomcfly.futurefit.core.AuthenticationExtractor;
+import neomcfly.futurefit.core.AuthenticationInvocationHandler;
+import neomcfly.futurefit.core.AuthentificationRequestFacade;
+import neomcfly.futurefit.core.AuthentificationRequestInterceptor;
 import retrofit.Endpoint;
 import retrofit.ErrorHandler;
 import retrofit.Profiler;
@@ -13,10 +17,6 @@ import retrofit.RestAdapter.LogLevel;
 import retrofit.client.Client;
 import retrofit.client.Client.Provider;
 import retrofit.converter.Converter;
-import fr.free.neomcfly.futurefit.core.AuthenticationExtractor;
-import fr.free.neomcfly.futurefit.core.AuthenticationInvocationHandler;
-import fr.free.neomcfly.futurefit.core.AuthentificationRequestFacade;
-import fr.free.neomcfly.futurefit.core.AuthentificationRequestInterceptor;
 
 public class FutureFitAdapter {
 

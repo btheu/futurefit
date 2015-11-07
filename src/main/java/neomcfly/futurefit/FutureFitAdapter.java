@@ -18,13 +18,18 @@ import retrofit.client.Client;
 import retrofit.client.Client.Provider;
 import retrofit.converter.Converter;
 
+/**
+ * 
+ * @author NeoMcFly
+ *
+ */
 public class FutureFitAdapter {
 
-	private retrofit.RestAdapter.Builder builder;
+	private final retrofit.RestAdapter.Builder builder;
 
 	public static class Builder {
 
-		private RestAdapter.Builder builder;
+		private final RestAdapter.Builder builder;
 
 		public Builder() {
 			this.builder = new RestAdapter.Builder();
@@ -75,13 +80,12 @@ public class FutureFitAdapter {
 			return this;
 		};
 
-		public Builder setProfiler(Profiler profiler) {
+		public Builder setProfiler(Profiler<?> profiler) {
 			builder.setProfiler(profiler);
 			return this;
 		};
 
-		public Builder setRequestInterceptor(
-				RequestInterceptor requestInterceptor) {
+		public Builder setRequestInterceptor(RequestInterceptor requestInterceptor) {
 			builder.setRequestInterceptor(requestInterceptor);
 			return this;
 		};
@@ -106,68 +110,53 @@ public class FutureFitAdapter {
 				if (this.authentificationRequestFacade != null) {
 					switch (this.authentificationRequestFacade.getType()) {
 					case ENCODED:
-						request.addHeader(
-								authentificationRequestFacade.getName(),
+						request.addHeader(authentificationRequestFacade.getName(),
 								authentificationRequestFacade.getValue());
 						break;
 					case ENCODED_PATH_PARAM:
-						request.addEncodedPathParam(
-								authentificationRequestFacade.getName(),
+						request.addEncodedPathParam(authentificationRequestFacade.getName(),
 								authentificationRequestFacade.getValue());
 						break;
 					case ENCODED_QUERY_PARAM:
-						request.addEncodedQueryParam(
-								authentificationRequestFacade.getName(),
+						request.addEncodedQueryParam(authentificationRequestFacade.getName(),
 								authentificationRequestFacade.getValue());
 						break;
 					case HEADER:
-						request.addHeader(
-								authentificationRequestFacade.getName(),
+						request.addHeader(authentificationRequestFacade.getName(),
 								authentificationRequestFacade.getValue());
 						break;
 					case PATH_PARAM:
-						request.addPathParam(
-								authentificationRequestFacade.getName(),
+						request.addPathParam(authentificationRequestFacade.getName(),
 								authentificationRequestFacade.getValue());
 						break;
 					case QUERY_PARAM:
-						request.addQueryParam(
-								authentificationRequestFacade.getName(),
+						request.addQueryParam(authentificationRequestFacade.getName(),
 								authentificationRequestFacade.getValue());
 						break;
 					default:
-						throw new RuntimeException("Type not implemented: "
-								+ this.authentificationRequestFacade.getType()
-										.name());
+						throw new RuntimeException(
+								"Type not implemented: " + this.authentificationRequestFacade.getType().name());
 					}
 				}
-
 			}
-
 		};
 
-		T retrofitAdapter = this.builder
-				.setRequestInterceptor(tokenInterceptor).build().create(class1);
+		T retrofitAdapter = this.builder.setRequestInterceptor(tokenInterceptor).build().create(class1);
 
-		return createAuthProxy(class1, retrofitAdapter,
-				new AuthenticationExtractor() {
+		return createAuthProxy(class1, retrofitAdapter, new AuthenticationExtractor() {
 
-					@Override
-					public void extracted(
-							AuthentificationRequestFacade authentificationRequestFacade) {
-						tokenInterceptor
-								.setAuthentificationRequestFacade(authentificationRequestFacade);
-					}
-				});
+			@Override
+			public void extracted(AuthentificationRequestFacade authentificationRequestFacade) {
+				tokenInterceptor.setAuthentificationRequestFacade(authentificationRequestFacade);
+			}
+		});
 
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T> T createAuthProxy(Class<T> targetInterface, T delegate,
-			AuthenticationExtractor extractor) {
+	private static <T> T createAuthProxy(Class<T> targetInterface, T delegate, AuthenticationExtractor extractor) {
 
-		return (T) Proxy.newProxyInstance(targetInterface.getClassLoader(),
-				new Class<?>[] { targetInterface },
+		return (T) Proxy.newProxyInstance(targetInterface.getClassLoader(), new Class<?>[] { targetInterface },
 				new AuthenticationInvocationHandler<T>(delegate, extractor));
 	}
 

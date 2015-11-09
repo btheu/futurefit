@@ -1,15 +1,18 @@
-/target/
+*~
+.metadata
+target/
+tmp/
+*.tmp
+*.bak
+*.swp
+local.properties
+.settings/
 
-*.class
+# Eclipse Core
+.project
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+# External tool builders
+.externalToolBuilders/
 
-# Package Files #
-*.jar
-*.war
-*.ear
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-
+# JDT-specific (Eclipse Java Development Tools)
+.classpath

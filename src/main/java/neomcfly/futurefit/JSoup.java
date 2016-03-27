@@ -7,13 +7,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Indicated these method returns a pojo from Jsoup mapping.
+ * Indicated these method returns a pojo from JSoup mapping.
  * 
  * @author theunissenb
  *
  */
 @Target({ METHOD })
 @Retention(RUNTIME)
-public @interface Jsoup {
+public @interface JSoup {
 
 }

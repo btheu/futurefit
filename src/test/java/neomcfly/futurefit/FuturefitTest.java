@@ -3,12 +3,13 @@ package neomcfly.futurefit;
 import org.junit.Assert;
 import org.junit.Test;
 
-import btheu.jsoupmapper.JSoupSelect;
-import btheu.jsoupmapper.JSoupText;
-import btheu.retrofit.jsoup.converter.JSoupConverter;
-import junit.framework.TestCase;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+
+import estivate.annotations.Select;
+import estivate.annotations.Text;
+import junit.framework.TestCase;
+import neomcfly.futurefit.converter.EstivateConvertor;
 import retrofit.RestAdapter.LogLevel;
 import retrofit.http.GET;
 import retrofit.http.Headers;
@@ -20,15 +21,14 @@ public class FuturefitTest {
     @Test
     public void test() {
 
-        Futurefit adapter = new Futurefit.Builder().setLogLevel(LogLevel.NONE)
-                .setEndpoint("https://www.google.com/")
-                .setConverter(new JSoupConverter()).build();
+        Futurefit adapter = new Futurefit.Builder().setLogLevel(LogLevel.NONE).setEndpoint("https://www.google.com/")
+                .setConverter(new EstivateConvertor()).build();
 
         GoogleApi create = adapter.create(GoogleApi.class);
 
         String stats = create.search("retrofit").getResultStatistics();
 
-        assertNotEmpty(stats);
+        this.assertNotEmpty(stats);
 
         log.info("Statistics [{}]", stats);
 
@@ -41,7 +41,7 @@ public class FuturefitTest {
 
     public static interface GoogleApi {
 
-        @JSoup
+        @Estivate
         @GET("/search?hl=en&safe=off")
         @Headers({ "User-Agent:Mozilla" })
         public Page search(@Query("q") String query);
@@ -52,8 +52,8 @@ public class FuturefitTest {
     public static class Page {
 
         // get the div holding statistics
-        @JSoupSelect("#resultStats")
-        @JSoupText
+        @Select("#resultStats")
+        @Text
         public String resultStatistics;
 
     }

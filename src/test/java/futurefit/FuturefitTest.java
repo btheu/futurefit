@@ -1,4 +1,4 @@
-package neomcfly.futurefit;
+package futurefit;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -8,8 +8,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import estivate.annotations.Select;
 import estivate.annotations.Text;
+import futurefit.Estivate;
+import futurefit.Futurefit;
+import futurefit.converter.EstivateConvertor;
 import junit.framework.TestCase;
-import neomcfly.futurefit.converter.EstivateConvertor;
 import retrofit.RestAdapter.LogLevel;
 import retrofit.http.GET;
 import retrofit.http.Headers;

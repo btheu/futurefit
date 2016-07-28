@@ -1,4 +1,4 @@
-package neomcfly.futurefit.core;
+package futurefit.core;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

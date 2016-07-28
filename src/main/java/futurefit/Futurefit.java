@@ -1,12 +1,12 @@
-package neomcfly.futurefit;
+package futurefit;
 
 import java.lang.reflect.Proxy;
 import java.util.concurrent.Executor;
 
-import neomcfly.futurefit.core.AuthenticationExtractor;
-import neomcfly.futurefit.core.AuthenticationInvocationHandler;
-import neomcfly.futurefit.core.AuthentificationRequestFacade;
-import neomcfly.futurefit.core.AuthentificationRequestInterceptor;
+import futurefit.core.AuthenticationExtractor;
+import futurefit.core.AuthenticationInvocationHandler;
+import futurefit.core.AuthentificationRequestFacade;
+import futurefit.core.AuthentificationRequestInterceptor;
 import retrofit.Endpoint;
 import retrofit.ErrorHandler;
 import retrofit.Profiler;

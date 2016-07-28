@@ -1,4 +1,4 @@
-package neomcfly.futurefit.converter;
+package futurefit.converter;
 
 import java.io.IOException;
 import java.lang.reflect.Type;

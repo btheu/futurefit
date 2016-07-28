@@ -1,4 +1,4 @@
-package neomcfly.futurefit.core;
+package futurefit.core;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;

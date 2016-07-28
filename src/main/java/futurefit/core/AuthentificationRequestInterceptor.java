@@ -2,14 +2,17 @@ package futurefit.core;
 
 import retrofit.RequestInterceptor;
 
-public abstract class AuthentificationRequestInterceptor implements
-		RequestInterceptor {
+/**
+ * 
+ * @author Benoit Theunissen
+ *
+ */
+public abstract class AuthentificationRequestInterceptor implements RequestInterceptor {
 
-	protected AuthentificationRequestFacade authentificationRequestFacade;
+    protected AuthentificationRequestFacade authentificationRequestFacade;
 
-	public void setAuthentificationRequestFacade(
-			AuthentificationRequestFacade authentificationRequestFacade) {
-		this.authentificationRequestFacade = authentificationRequestFacade;
-	}
+    public void setAuthentificationRequestFacade(AuthentificationRequestFacade authentificationRequestFacade) {
+        this.authentificationRequestFacade = authentificationRequestFacade;
+    }
 
 }

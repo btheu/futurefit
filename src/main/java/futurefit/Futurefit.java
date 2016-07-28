@@ -36,63 +36,62 @@ public class Futurefit {
         }
 
         public Builder setClient(Client client) {
-            builder.setClient(client);
+            this.builder.setClient(client);
             return this;
         };
 
         public Builder setClient(Provider provider) {
-            builder.setClient(provider);
+            this.builder.setClient(provider);
             return this;
         };
 
         public Builder setConverter(Converter converter) {
-            builder.setConverter(converter);
+            this.builder.setConverter(converter);
             return this;
         };
 
         public Builder setEndpoint(String endPoint) {
-            builder.setEndpoint(endPoint);
+            this.builder.setEndpoint(endPoint);
             return this;
         };
 
         public Builder setEndpoint(Endpoint endPoint) {
-            builder.setEndpoint(endPoint);
+            this.builder.setEndpoint(endPoint);
             return this;
         };
 
         public Builder setErrorHandler(ErrorHandler errorHandler) {
-            builder.setErrorHandler(errorHandler);
+            this.builder.setErrorHandler(errorHandler);
             return this;
         };
 
         public Builder setExecutors(Executor e1, Executor e2) {
-            builder.setExecutors(e1, e2);
+            this.builder.setExecutors(e1, e2);
             return this;
         };
 
         public Builder setLog(Log log) {
-            builder.setLog(log);
+            this.builder.setLog(log);
             return this;
         };
 
         public Builder setLogLevel(LogLevel level) {
-            builder.setLogLevel(level);
+            this.builder.setLogLevel(level);
             return this;
         };
 
         public Builder setProfiler(Profiler<?> profiler) {
-            builder.setProfiler(profiler);
+            this.builder.setProfiler(profiler);
             return this;
         };
 
-        public Builder setRequestInterceptor(
-                RequestInterceptor requestInterceptor) {
-            builder.setRequestInterceptor(requestInterceptor);
+        public Builder setRequestInterceptor(RequestInterceptor requestInterceptor) {
+            this.builder.setRequestInterceptor(requestInterceptor);
             return this;
         };
 
         public Futurefit build() {
-            return new Futurefit(builder);
+            return new Futurefit(this.builder);
         }
 
     }
@@ -105,72 +104,57 @@ public class Futurefit {
 
         final AuthentificationRequestInterceptor tokenInterceptor = new AuthentificationRequestInterceptor() {
 
-            @Override
             public void intercept(RequestFacade request) {
 
                 if (this.authentificationRequestFacade != null) {
                     switch (this.authentificationRequestFacade.getType()) {
                     case ENCODED:
-                        request.addHeader(
-                                authentificationRequestFacade.getName(),
-                                authentificationRequestFacade.getValue());
+                        request.addHeader(this.authentificationRequestFacade.getName(),
+                                this.authentificationRequestFacade.getValue());
                         break;
                     case ENCODED_PATH_PARAM:
-                        request.addEncodedPathParam(
-                                authentificationRequestFacade.getName(),
-                                authentificationRequestFacade.getValue());
+                        request.addEncodedPathParam(this.authentificationRequestFacade.getName(),
+                                this.authentificationRequestFacade.getValue());
                         break;
                     case ENCODED_QUERY_PARAM:
-                        request.addEncodedQueryParam(
-                                authentificationRequestFacade.getName(),
-                                authentificationRequestFacade.getValue());
+                        request.addEncodedQueryParam(this.authentificationRequestFacade.getName(),
+                                this.authentificationRequestFacade.getValue());
                         break;
                     case HEADER:
-                        request.addHeader(
-                                authentificationRequestFacade.getName(),
-                                authentificationRequestFacade.getValue());
+                        request.addHeader(this.authentificationRequestFacade.getName(),
+                                this.authentificationRequestFacade.getValue());
                         break;
                     case PATH_PARAM:
-                        request.addPathParam(
-                                authentificationRequestFacade.getName(),
-                                authentificationRequestFacade.getValue());
+                        request.addPathParam(this.authentificationRequestFacade.getName(),
+                                this.authentificationRequestFacade.getValue());
                         break;
                     case QUERY_PARAM:
-                        request.addQueryParam(
-                                authentificationRequestFacade.getName(),
-                                authentificationRequestFacade.getValue());
+                        request.addQueryParam(this.authentificationRequestFacade.getName(),
+                                this.authentificationRequestFacade.getValue());
                         break;
                     default:
-                        throw new RuntimeException("Type not implemented: "
-                                + this.authentificationRequestFacade.getType()
-                                        .name());
+                        throw new RuntimeException(
+                                "Type not implemented: " + this.authentificationRequestFacade.getType().name());
                     }
                 }
             }
         };
 
-        T retrofitAdapter = this.builder.setRequestInterceptor(tokenInterceptor)
-                .build().create(class1);
+        T retrofitAdapter = this.builder.setRequestInterceptor(tokenInterceptor).build().create(class1);
 
-        return createAuthProxy(class1, retrofitAdapter,
-                new AuthenticationExtractor() {
+        return createAuthProxy(class1, retrofitAdapter, new AuthenticationExtractor() {
 
-                    @Override
-                    public void extracted(
-                            AuthentificationRequestFacade authentificationRequestFacade) {
-                        tokenInterceptor.setAuthentificationRequestFacade(
-                                authentificationRequestFacade);
-                    }
-                });
+            public void extracted(AuthentificationRequestFacade authentificationRequestFacade) {
+                tokenInterceptor.setAuthentificationRequestFacade(authentificationRequestFacade);
+            }
+        });
 
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T createAuthProxy(Class<T> targetInterface, T delegate,
-            AuthenticationExtractor extractor) {
+    private static <T> T createAuthProxy(Class<T> targetInterface, T delegate, AuthenticationExtractor extractor) {
 
-        return (T) Proxy.newProxyInstance(targetInterface.getClassLoader(),
-                new Class<?>[] { targetInterface },
+        return (T) Proxy.newProxyInstance(targetInterface.getClassLoader(), new Class<?>[] { targetInterface },
                 new AuthenticationInvocationHandler<T>(delegate, extractor));
     }
 

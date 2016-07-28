@@ -9,6 +9,11 @@ import retrofit.converter.Converter;
 import retrofit.mime.TypedInput;
 import retrofit.mime.TypedOutput;
 
+/**
+ * 
+ * @author Benoit Theunissen
+ *
+ */
 public class EstivateConvertor implements Converter {
 
     private final EstivateMapper2 mapper = new EstivateMapper2();
@@ -24,7 +29,6 @@ public class EstivateConvertor implements Converter {
         this.mapper.setEncoding(encoding);
     }
 
-    @Override
     public Object fromBody(TypedInput body, Type type) throws ConversionException {
         try {
             return this.mapper.map(body.in(), (Class) type);
@@ -33,7 +37,6 @@ public class EstivateConvertor implements Converter {
         }
     }
 
-    @Override
     public TypedOutput toBody(Object object) {
         throw new RuntimeException("Convertion to body can't be for JSoupConvertor");
     }

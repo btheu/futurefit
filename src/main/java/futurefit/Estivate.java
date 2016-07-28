@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 /**
  * Indicated these method returns a pojo from Estivate mapping.
  * 
- * @author theunissenb
+ * @author Benoit Theunissen
  *
  */
 @Target({ METHOD })

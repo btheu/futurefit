@@ -3,44 +3,45 @@ package futurefit.core;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
+/**
+ * 
+ * @author Benoit Theunissen
+ *
+ * @param <T>
+ */
 public class AuthenticationInvocationHandler<T> implements InvocationHandler {
 
-	private T delegate;
-	private AuthenticationExtractor extractor;
+    private T delegate;
+    private AuthenticationExtractor extractor;
 
-	public AuthenticationInvocationHandler(T delegate,
-			AuthenticationExtractor extractor) {
-		this.delegate = delegate;
-		this.extractor = extractor;
-	}
+    public AuthenticationInvocationHandler(T delegate, AuthenticationExtractor extractor) {
+        this.delegate = delegate;
+        this.extractor = extractor;
+    }
 
-	@Override
-	public Object invoke(Object proxy, Method method, Object[] args)
-			throws Throwable {
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
-		Object invoke = method.invoke(delegate, args);
+        Object invoke = method.invoke(this.delegate, args);
 
-		Authentification annotation = method
-				.getAnnotation(Authentification.class);
+        Authentification annotation = method.getAnnotation(Authentification.class);
 
-		if (annotation != null) {
+        if (annotation != null) {
 
-			Class<? extends AuthenticationHandler> handler = annotation
-					.handler();
-			if (handler != null) {
+            Class<? extends AuthenticationHandler> handler = annotation.handler();
+            if (handler != null) {
 
-				AuthenticationHandler newInstance = handler.newInstance();
+                AuthenticationHandler newInstance = handler.newInstance();
 
-				AuthentificationRequestFacade authentificationRequestFacade = new AuthentificationRequestFacade();
+                AuthentificationRequestFacade authentificationRequestFacade = new AuthentificationRequestFacade();
 
-				newInstance.handler(authentificationRequestFacade, invoke);
+                newInstance.handler(authentificationRequestFacade, invoke);
 
-				extractor.extracted(authentificationRequestFacade);
+                this.extractor.extracted(authentificationRequestFacade);
 
-			}
-		}
+            }
+        }
 
-		return invoke;
-	}
+        return invoke;
+    }
 
 }

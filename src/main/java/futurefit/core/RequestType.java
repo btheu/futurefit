@@ -1,5 +1,10 @@
 package futurefit.core;
 
+/**
+ * 
+ * @author Benoit Theunissen
+ *
+ */
 public enum RequestType {
 
     HEADER,

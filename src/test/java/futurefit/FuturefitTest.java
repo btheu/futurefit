@@ -8,8 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import estivate.annotations.Select;
 import estivate.annotations.Text;
-import futurefit.Estivate;
-import futurefit.Futurefit;
 import futurefit.converter.EstivateConvertor;
 import junit.framework.TestCase;
 import retrofit.RestAdapter.LogLevel;
@@ -17,6 +15,11 @@ import retrofit.http.GET;
 import retrofit.http.Headers;
 import retrofit.http.Query;
 
+/**
+ * 
+ * @author Benoit Theunissen
+ *
+ */
 @Slf4j
 public class FuturefitTest {
 

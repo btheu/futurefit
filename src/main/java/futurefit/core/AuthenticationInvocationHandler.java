@@ -3,6 +3,8 @@ package futurefit.core;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
+import futurefit.Authentification;
+
 /**
  * 
  * @author Benoit Theunissen
@@ -37,7 +39,6 @@ public class AuthenticationInvocationHandler<T> implements InvocationHandler {
                 newInstance.handler(authentificationRequestFacade, invoke);
 
                 this.extractor.extracted(authentificationRequestFacade);
-
             }
         }
 

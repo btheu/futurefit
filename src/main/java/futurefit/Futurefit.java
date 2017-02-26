@@ -7,6 +7,8 @@ import futurefit.core.AuthenticationExtractor;
 import futurefit.core.AuthenticationInvocationHandler;
 import futurefit.core.AuthentificationRequestFacade;
 import futurefit.core.AuthentificationRequestInterceptor;
+import futurefit.utils.ComposedRequestInterceptor;
+import futurefit.utils.VoidRequestInterceptor;
 import retrofit.Endpoint;
 import retrofit.ErrorHandler;
 import retrofit.Profiler;
@@ -25,82 +27,86 @@ import retrofit.converter.Converter;
  */
 public class Futurefit {
 
-    private final retrofit.RestAdapter.Builder builder;
+    private final RestAdapter.Builder restBuilder;
+    private RequestInterceptor        interceptor;
 
     public static class Builder {
 
-        private final RestAdapter.Builder builder;
+        protected final RestAdapter.Builder restBuilder;
+
+        protected RequestInterceptor interceptor = new VoidRequestInterceptor();
 
         public Builder() {
-            this.builder = new RestAdapter.Builder();
+            this.restBuilder = new RestAdapter.Builder();
         }
 
         public Builder setClient(Client client) {
-            this.builder.setClient(client);
+            this.restBuilder.setClient(client);
             return this;
         };
 
         public Builder setClient(Provider provider) {
-            this.builder.setClient(provider);
+            this.restBuilder.setClient(provider);
             return this;
         };
 
         public Builder setConverter(Converter converter) {
-            this.builder.setConverter(converter);
+            this.restBuilder.setConverter(converter);
             return this;
         };
 
         public Builder setEndpoint(String endPoint) {
-            this.builder.setEndpoint(endPoint);
+            this.restBuilder.setEndpoint(endPoint);
             return this;
         };
 
         public Builder setEndpoint(Endpoint endPoint) {
-            this.builder.setEndpoint(endPoint);
+            this.restBuilder.setEndpoint(endPoint);
             return this;
         };
 
         public Builder setErrorHandler(ErrorHandler errorHandler) {
-            this.builder.setErrorHandler(errorHandler);
+            this.restBuilder.setErrorHandler(errorHandler);
             return this;
         };
 
         public Builder setExecutors(Executor e1, Executor e2) {
-            this.builder.setExecutors(e1, e2);
+            this.restBuilder.setExecutors(e1, e2);
             return this;
         };
 
         public Builder setLog(Log log) {
-            this.builder.setLog(log);
+            this.restBuilder.setLog(log);
             return this;
         };
 
         public Builder setLogLevel(LogLevel level) {
-            this.builder.setLogLevel(level);
+            this.restBuilder.setLogLevel(level);
             return this;
         };
 
         public Builder setProfiler(Profiler<?> profiler) {
-            this.builder.setProfiler(profiler);
+            this.restBuilder.setProfiler(profiler);
             return this;
         };
 
         public Builder setRequestInterceptor(RequestInterceptor requestInterceptor) {
-            this.builder.setRequestInterceptor(requestInterceptor);
+            interceptor = requestInterceptor;
             return this;
         };
 
         public Futurefit build() {
-            return new Futurefit(this.builder);
+            return new Futurefit(this.restBuilder, this.interceptor);
         }
 
     }
 
-    private Futurefit(retrofit.RestAdapter.Builder builder) {
-        this.builder = builder;
+    private Futurefit(RestAdapter.Builder restBuilder, RequestInterceptor interceptor) {
+        this.restBuilder = restBuilder;
+        this.interceptor = interceptor;
     }
 
-    public <T> T create(Class<T> class1) {
+    public <T> T create(Class<T> apiClass) {
 
         final AuthentificationRequestInterceptor tokenInterceptor = new AuthentificationRequestInterceptor() {
 
@@ -140,9 +146,13 @@ public class Futurefit {
             }
         };
 
-        T retrofitAdapter = this.builder.setRequestInterceptor(tokenInterceptor).build().create(class1);
+        final ComposedRequestInterceptor interceptors = new ComposedRequestInterceptor();
+        interceptors.add(tokenInterceptor);
+        interceptors.add(interceptor);
 
-        return createAuthProxy(class1, retrofitAdapter, new AuthenticationExtractor() {
+        T retrofitAdapter = this.restBuilder.setRequestInterceptor(interceptors).build().create(apiClass);
+
+        return createAuthProxy(apiClass, retrofitAdapter, new AuthenticationExtractor() {
 
             public void extracted(AuthentificationRequestFacade authentificationRequestFacade) {
                 tokenInterceptor.setAuthentificationRequestFacade(authentificationRequestFacade);

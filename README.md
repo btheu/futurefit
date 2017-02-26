@@ -41,4 +41,8 @@ An extention of the great Retrofit with integration of <a href="https://github.c
 	<version>0.1.2</version>
 </dependency>
 ```
+## Changelog
 
+### 0.1.2 - 26/02/2017
+
+*	fix:custom request interceptor was hiden by Futurefit

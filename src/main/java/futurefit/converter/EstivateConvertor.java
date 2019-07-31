@@ -14,6 +14,7 @@ import retrofit.mime.TypedOutput;
  * @author Benoit Theunissen
  *
  */
+@Deprecated
 public class EstivateConvertor implements Converter {
 
     private final EstivateMapper mapper = new EstivateMapper();

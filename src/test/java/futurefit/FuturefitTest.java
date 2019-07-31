@@ -3,13 +3,12 @@ package futurefit;
 import org.junit.Assert;
 import org.junit.Test;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-
 import estivate.annotations.Select;
 import estivate.annotations.Text;
 import futurefit.converter.EstivateConvertor;
 import junit.framework.TestCase;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import retrofit.RestAdapter.LogLevel;
 import retrofit.http.GET;
 import retrofit.http.Headers;
@@ -48,7 +47,7 @@ public class FuturefitTest {
 
         @Estivate
         @GET("/search?hl=en&safe=off")
-        @Headers({ "User-Agent:Mozilla" })
+        @Headers({ "User-Agent:Mozilla/5.0 Firefox/68.0" })
         public Page search(@Query("q") String query);
 
     }

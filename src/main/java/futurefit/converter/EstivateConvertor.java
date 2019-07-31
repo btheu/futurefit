@@ -38,7 +38,7 @@ public class EstivateConvertor implements Converter {
     }
 
     public TypedOutput toBody(Object object) {
-        throw new RuntimeException("Convertion to body can't be for JSoupConvertor");
+        throw new RuntimeException("Convertion to body can't be for EstivateConvertor");
     }
 
 }

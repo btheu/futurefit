@@ -13,6 +13,7 @@ import futurefit.core.AuthenticationHandler;
  * @author Benoit Theunissen
  *
  */
+@Deprecated
 @Target({ METHOD })
 @Retention(RUNTIME)
 public @interface Authentification {

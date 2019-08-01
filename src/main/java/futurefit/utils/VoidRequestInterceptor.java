@@ -11,8 +11,10 @@ import retrofit.RequestInterceptor;
  * @author Benoit Theunissen
  *
  */
+@Deprecated
 public class VoidRequestInterceptor implements RequestInterceptor {
 
+    @Override
     public void intercept(RequestFacade request) {
     }
 

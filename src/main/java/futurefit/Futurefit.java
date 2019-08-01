@@ -25,6 +25,7 @@ import retrofit.converter.Converter;
  * @author Benoit Theunissen
  *
  */
+@Deprecated
 public class Futurefit {
 
     private final RestAdapter.Builder restBuilder;
@@ -110,6 +111,7 @@ public class Futurefit {
 
         final AuthentificationRequestInterceptor tokenInterceptor = new AuthentificationRequestInterceptor() {
 
+            @Override
             public void intercept(RequestFacade request) {
 
                 if (this.authentificationRequestFacade != null) {
@@ -154,6 +156,7 @@ public class Futurefit {
 
         return createAuthProxy(apiClass, retrofitAdapter, new AuthenticationExtractor() {
 
+            @Override
             public void extracted(AuthentificationRequestFacade authentificationRequestFacade) {
                 tokenInterceptor.setAuthentificationRequestFacade(authentificationRequestFacade);
             }

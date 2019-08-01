@@ -7,6 +7,7 @@ import retrofit.RequestInterceptor;
  * @author Benoit Theunissen
  *
  */
+@Deprecated
 public abstract class AuthentificationRequestInterceptor implements RequestInterceptor {
 
     protected AuthentificationRequestFacade authentificationRequestFacade;

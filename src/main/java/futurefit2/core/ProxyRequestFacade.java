@@ -14,7 +14,7 @@ public class ProxyRequestFacade implements RequestFacade {
     @Getter
     private String value;
     @Getter
-    private Type   type;
+    private Type   type = Type.NONE;
 
     @Override
     public void addHeader(String name, String value) {
@@ -52,11 +52,11 @@ public class ProxyRequestFacade implements RequestFacade {
     }
 
     public static enum Type {
+        NONE,
         HEADER,
         PATH_PARAM,
         ENCODED_PATH_PARAM,
         QUERY_PARAM,
-        ENCODED,
-        ENCODED_QUERY_PARAM
+        ENCODED_QUERY_PARAM,
     }
 }

@@ -15,8 +15,11 @@ public class InterceptorProxyInvocationHandler<T> implements InvocationHandler {
 
     private T delegate;
 
-    public InterceptorProxyInvocationHandler(T delegate) {
+    private RequestFacadeCallback callback;
+
+    public InterceptorProxyInvocationHandler(T delegate, RequestFacadeCallback callback) {
         this.delegate = delegate;
+        this.callback = callback;
     }
 
     @Override
@@ -36,6 +39,8 @@ public class InterceptorProxyInvocationHandler<T> implements InvocationHandler {
                 ProxyRequestFacade requestFacade = new ProxyRequestFacade();
 
                 newInstance.intercept(requestFacade, method.getAnnotations(), invoke);
+
+                callback.apply(requestFacade);
             }
         }
 

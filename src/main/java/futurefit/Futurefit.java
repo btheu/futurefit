@@ -116,10 +116,6 @@ public class Futurefit {
 
                 if (this.authentificationRequestFacade != null) {
                     switch (this.authentificationRequestFacade.getType()) {
-                    case ENCODED:
-                        request.addHeader(this.authentificationRequestFacade.getName(),
-                                this.authentificationRequestFacade.getValue());
-                        break;
                     case ENCODED_PATH_PARAM:
                         request.addEncodedPathParam(this.authentificationRequestFacade.getName(),
                                 this.authentificationRequestFacade.getValue());

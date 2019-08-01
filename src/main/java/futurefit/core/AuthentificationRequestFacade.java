@@ -58,7 +58,6 @@ public class AuthentificationRequestFacade implements RequestFacade {
         PATH_PARAM,
         ENCODED_PATH_PARAM,
         QUERY_PARAM,
-        ENCODED,
         ENCODED_QUERY_PARAM
     }
 }

@@ -48,11 +48,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.squareup.retrofit</groupId>
-			<artifactId>retrofit</artifactId>
-			<version>1.9.0</version>
-		</dependency>
-		<dependency>
 			<groupId>com.squareup.retrofit2</groupId>
 			<artifactId>retrofit</artifactId>
 			<version>2.6.0</version>
@@ -68,6 +63,12 @@
 			<groupId>com.github.btheu.estivate</groupId>
 			<artifactId>estivate</artifactId>
 			<version>0.3.6</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.retrofit</groupId>
+			<artifactId>retrofit</artifactId>
+			<version>1.9.0</version>
+			<optional>true</optional>
 		</dependency>
 	</dependencies>
 

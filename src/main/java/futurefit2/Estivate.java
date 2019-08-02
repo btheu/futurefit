@@ -1,4 +1,4 @@
-package futurefit;
+package futurefit2;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -6,18 +6,14 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import futurefit.core.AuthenticationHandler;
-
 /**
+ * Indicated these method returns a pojo from Estivate mapping.
  * 
  * @author Benoit Theunissen
  *
  */
-@Deprecated
 @Target({ METHOD })
 @Retention(RUNTIME)
-public @interface Authentification {
-
-    Class<? extends AuthenticationHandler> handler();
+public @interface Estivate {
 
 }

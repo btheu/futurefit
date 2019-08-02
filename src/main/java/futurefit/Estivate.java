@@ -12,6 +12,7 @@ import java.lang.annotation.Target;
  * @author Benoit Theunissen
  *
  */
+@Deprecated
 @Target({ METHOD })
 @Retention(RUNTIME)
 public @interface Estivate {

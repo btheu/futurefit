@@ -11,9 +11,10 @@ import futurefit.Authentification;
  *
  * @param <T>
  */
+@Deprecated
 public class AuthenticationInvocationHandler<T> implements InvocationHandler {
 
-    private T delegate;
+    private T                       delegate;
     private AuthenticationExtractor extractor;
 
     public AuthenticationInvocationHandler(T delegate, AuthenticationExtractor extractor) {
@@ -21,6 +22,7 @@ public class AuthenticationInvocationHandler<T> implements InvocationHandler {
         this.extractor = extractor;
     }
 
+    @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
         Object invoke = method.invoke(this.delegate, args);

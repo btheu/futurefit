@@ -1,4 +1,4 @@
-package futurefit;
+package futurefit2;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -6,18 +6,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import futurefit.core.AuthenticationHandler;
+import futurefit2.core.RequestInterceptor;
 
-/**
- * 
- * @author Benoit Theunissen
- *
- */
-@Deprecated
 @Target({ METHOD })
 @Retention(RUNTIME)
-public @interface Authentification {
+public @interface Intercept {
 
-    Class<? extends AuthenticationHandler> handler();
+    Class<? extends RequestInterceptor> handler();
 
 }

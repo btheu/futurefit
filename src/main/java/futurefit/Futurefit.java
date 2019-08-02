@@ -25,6 +25,7 @@ import retrofit.converter.Converter;
  * @author Benoit Theunissen
  *
  */
+@Deprecated
 public class Futurefit {
 
     private final RestAdapter.Builder restBuilder;
@@ -110,14 +111,11 @@ public class Futurefit {
 
         final AuthentificationRequestInterceptor tokenInterceptor = new AuthentificationRequestInterceptor() {
 
+            @Override
             public void intercept(RequestFacade request) {
 
                 if (this.authentificationRequestFacade != null) {
                     switch (this.authentificationRequestFacade.getType()) {
-                    case ENCODED:
-                        request.addHeader(this.authentificationRequestFacade.getName(),
-                                this.authentificationRequestFacade.getValue());
-                        break;
                     case ENCODED_PATH_PARAM:
                         request.addEncodedPathParam(this.authentificationRequestFacade.getName(),
                                 this.authentificationRequestFacade.getValue());
@@ -154,6 +152,7 @@ public class Futurefit {
 
         return createAuthProxy(apiClass, retrofitAdapter, new AuthenticationExtractor() {
 
+            @Override
             public void extracted(AuthentificationRequestFacade authentificationRequestFacade) {
                 tokenInterceptor.setAuthentificationRequestFacade(authentificationRequestFacade);
             }

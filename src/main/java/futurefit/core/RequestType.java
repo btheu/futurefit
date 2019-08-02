@@ -5,6 +5,7 @@ package futurefit.core;
  * @author Benoit Theunissen
  *
  */
+@Deprecated
 public enum RequestType {
 
     HEADER,

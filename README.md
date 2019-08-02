@@ -6,7 +6,7 @@ An extention of the great Retrofit with integration of <a href="https://github.c
 ```java
 
     public static void main(String args[]) {
-	    Futurefit2 adapter = new Futurefit.Builder()
+	    Futurefit2 adapter = new Futurefit2.Builder()
 	    	.baseUrl("https://www.google.com/")
 	      .build();
 		

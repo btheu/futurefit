@@ -40,6 +40,24 @@ public class Futurefit2Test {
         log.info("Statistics [{}]", stats);
     }
 
+    @Test
+    public void testDirect() throws IOException {
+
+        Futurefit2.Builder builder = new Futurefit2.Builder();
+
+        Futurefit2 build = builder.baseUrl("https://www.google.com/").build();
+
+        GoogleApi create = build.create(GoogleApi.class);
+
+        create.search("word").execute().body().getResultStatistics();
+
+        String stats = create.searchDirect("estivate").getResultStatistics();
+
+        this.assertNotEmpty(stats);
+
+        log.info("Statistics [{}]", stats);
+    }
+
     private void assertNotEmpty(String sentence) {
         TestCase.assertNotNull(sentence);
         Assert.assertNotEquals("", sentence.trim());

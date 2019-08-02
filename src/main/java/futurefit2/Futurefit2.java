@@ -1,17 +1,22 @@
 package futurefit2;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
 import java.net.URL;
 
 import futurefit2.convertor.EstivateConverterFactory;
 import futurefit2.core.InterceptorProxyInvocationHandler;
 import futurefit2.core.ProxyRequestFacade;
 import futurefit2.core.RequestFacadeCallback;
+import futurefit2.core.UnboxCallAdapter;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
+import retrofit2.CallAdapter;
 import retrofit2.Retrofit;
 
 /**
@@ -19,11 +24,33 @@ import retrofit2.Retrofit;
  * @author Benoit Theunissen
  *
  */
+@Slf4j
 public class Futurefit2 {
 
     private final Retrofit.Builder retrofitBuilder;
 
     private final RequestUpdateInterceptor requestUpdateInterceptor;
+
+    private static CallAdapter.Factory callAdapterFactory = new CallAdapter.Factory() {
+        @Override
+        public CallAdapter<?, ?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
+            if (startWithAny(returnType.getTypeName(), "retrofit", "okhttp")) {
+                // skip to default call adapter
+                return null;
+            }
+            log.debug("unbox call adapter for {}", returnType);
+            return new UnboxCallAdapter<>(returnType);
+        }
+
+        private boolean startWithAny(String typeName, String... string2) {
+            for (String string : string2) {
+                if (typeName.startsWith(string)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    };
 
     public static class Builder {
 
@@ -35,6 +62,7 @@ public class Futurefit2 {
         public Builder() {
             this.retrofitBuilder = new Retrofit.Builder();
             this.retrofitBuilder.addConverterFactory(EstivateConverterFactory.create());
+            this.retrofitBuilder.addCallAdapterFactory(callAdapterFactory);
             this.retrofitBuilder
                     .client(new OkHttpClient.Builder().addNetworkInterceptor(requestUpdateInterceptor).build());
         }

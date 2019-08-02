@@ -13,6 +13,7 @@ import futurefit2.core.RequestInterceptor;
 import junit.framework.TestCase;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
@@ -49,13 +50,26 @@ public class Futurefit2Test {
 
         GoogleApi create = build.create(GoogleApi.class);
 
-        create.search("word").execute().body().getResultStatistics();
-
         String stats = create.searchDirect("estivate").getResultStatistics();
 
         this.assertNotEmpty(stats);
 
         log.info("Statistics [{}]", stats);
+    }
+
+    @Test
+    public void testResponse() throws IOException {
+        Futurefit2.Builder builder = new Futurefit2.Builder();
+
+        Futurefit2 build = builder.baseUrl("https://www.google.com/").build();
+
+        GoogleApi create = build.create(GoogleApi.class);
+
+        create.search("word").execute().body().getResultStatistics();
+
+        ResponseBody response = create.searchResponse("estivate");
+
+        log.info("Statistics [{}]", response);
     }
 
     private void assertNotEmpty(String sentence) {
@@ -83,6 +97,10 @@ public class Futurefit2Test {
         @GET("/search?hl=en&safe=off")
         @Headers({ "User-Agent:Mozilla/5.0 Firefox/68.0" })
         public Page searchDirect(@Query("q") String query);
+
+        @GET("/search?hl=en&safe=off")
+        @Headers({ "User-Agent:Mozilla/5.0 Firefox/68.0" })
+        public ResponseBody searchResponse(@Query("q") String query);
 
     }
 

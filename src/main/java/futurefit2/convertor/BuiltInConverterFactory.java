@@ -9,9 +9,9 @@ import retrofit2.Converter;
 import retrofit2.Converter.Factory;
 import retrofit2.Retrofit;
 
-public class EstivateConverterFactory extends Factory {
+public class BuiltInConverterFactory extends Factory {
 
-    private EstivateConverterFactory() {
+    private BuiltInConverterFactory() {
         // private
     }
 
@@ -19,14 +19,14 @@ public class EstivateConverterFactory extends Factory {
     public Converter<ResponseBody, ?> responseBodyConverter(Type type, Annotation[] annotations, Retrofit retrofit) {
         for (Annotation annotation : annotations) {
             if (annotation.annotationType().equals(Estivate.class)) {
-                return new EstivateResponseConvertor<>(type);
+                return EstivateConvertor.create(type);
             }
         }
         return null;
     }
 
     public static Factory create() {
-        return new EstivateConverterFactory();
+        return new BuiltInConverterFactory();
     }
 
 }

@@ -12,20 +12,13 @@ import retrofit2.Converter;
  * @author Benoit Theunissen
  *
  */
-public class EstivateResponseConvertor<T> implements Converter<ResponseBody, T> {
+public class EstivateConvertor<T> implements Converter<ResponseBody, T> {
 
     private Type type;
 
     private final EstivateMapper mapper = new EstivateMapper();
 
-    public EstivateResponseConvertor() {
-    }
-
-    public EstivateResponseConvertor(String encoding) {
-        this.setEncoding(encoding);
-    }
-
-    public EstivateResponseConvertor(Type type) {
+    private EstivateConvertor(Type type) {
         this.type = type;
     }
 
@@ -41,6 +34,10 @@ public class EstivateResponseConvertor<T> implements Converter<ResponseBody, T> 
         } catch (IOException e) {
             throw new RuntimeException("Error occurs at conversion", e);
         }
+    }
+
+    public static EstivateConvertor<?> create(Type type2) {
+        return new EstivateConvertor<>(type2);
     }
 
 }

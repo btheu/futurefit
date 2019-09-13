@@ -14,6 +14,7 @@ import junit.framework.TestCase;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.ResponseBody;
+import okhttp3.logging.HttpLoggingInterceptor.Level;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
@@ -30,7 +31,7 @@ public class Futurefit2Test {
     @Test
     public void test() throws IOException {
 
-        Futurefit2 build = new Futurefit2.Builder().baseUrl("https://www.google.com/").build();
+        Futurefit2 build = new Futurefit2.Builder().log(Level.BASIC).baseUrl("https://www.google.com/").build();
 
         GoogleApi create = build.create(GoogleApi.class);
 

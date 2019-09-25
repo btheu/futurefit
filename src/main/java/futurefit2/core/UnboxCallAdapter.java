@@ -3,11 +3,9 @@ package futurefit2.core;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-import lombok.extern.slf4j.Slf4j;
 import retrofit2.Call;
 import retrofit2.CallAdapter;
 
-@Slf4j
 public class UnboxCallAdapter<R, T> implements CallAdapter<R, T> {
 
     private Type type;
@@ -27,8 +25,7 @@ public class UnboxCallAdapter<R, T> implements CallAdapter<R, T> {
         try {
             return (T) call.execute().body();
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
-            return null;
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 }

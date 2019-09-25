@@ -6,7 +6,7 @@ import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.net.URL;
 
-import futurefit2.convertor.EstivateConverterFactory;
+import futurefit2.convertor.BuiltInConverterFactory;
 import futurefit2.core.InterceptorProxyInvocationHandler;
 import futurefit2.core.ProxyRequestFacade;
 import futurefit2.core.RequestFacadeCallback;
@@ -16,6 +16,9 @@ import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
+import okhttp3.logging.HttpLoggingInterceptor.Level;
+import retrofit2.Call;
 import retrofit2.CallAdapter;
 import retrofit2.Retrofit;
 
@@ -34,7 +37,7 @@ public class Futurefit2 {
     private static CallAdapter.Factory callAdapterFactory = new CallAdapter.Factory() {
         @Override
         public CallAdapter<?, ?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
-            if (startWithAny(returnType.getTypeName(), "retrofit", "okhttp")) {
+            if (startWithAny(returnType.getTypeName(), Call.class.getCanonicalName())) {
                 // skip to default call adapter
                 return null;
             }
@@ -54,17 +57,16 @@ public class Futurefit2 {
 
     public static class Builder {
 
-        protected final Retrofit.Builder         retrofitBuilder;
-        protected final RequestUpdateInterceptor requestUpdateInterceptor = new RequestUpdateInterceptor();
+        protected OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
 
-        protected boolean client = false;
+        protected final Retrofit.Builder retrofitBuilder = new Retrofit.Builder();
+
+        protected final RequestUpdateInterceptor requestUpdateInterceptor = new RequestUpdateInterceptor();
+        protected final HttpLoggingInterceptor   loggingInterceptor       = new HttpLoggingInterceptor();
 
         public Builder() {
-            this.retrofitBuilder = new Retrofit.Builder();
-            this.retrofitBuilder.addConverterFactory(EstivateConverterFactory.create());
+            this.retrofitBuilder.addConverterFactory(BuiltInConverterFactory.create());
             this.retrofitBuilder.addCallAdapterFactory(callAdapterFactory);
-            this.retrofitBuilder
-                    .client(new OkHttpClient.Builder().addNetworkInterceptor(requestUpdateInterceptor).build());
         }
 
         public Retrofit.Builder retrofit() {
@@ -72,9 +74,7 @@ public class Futurefit2 {
         };
 
         public Builder client(OkHttpClient client) {
-            OkHttpClient newClient = client.newBuilder().addNetworkInterceptor(requestUpdateInterceptor).build();
-            this.retrofitBuilder.client(newClient);
-            this.client = true;
+            clientBuilder = client.newBuilder();
             return this;
         };
 
@@ -93,7 +93,17 @@ public class Futurefit2 {
             return this;
         };
 
+        public Builder log(Level level) {
+            loggingInterceptor.setLevel(level);
+            return this;
+        };
+
         public Futurefit2 build() {
+            clientBuilder //
+                    .addNetworkInterceptor(requestUpdateInterceptor) //
+                    .addNetworkInterceptor(loggingInterceptor);
+
+            this.retrofitBuilder.client(clientBuilder.build());
             return new Futurefit2(this.retrofitBuilder, requestUpdateInterceptor);
         }
 

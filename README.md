@@ -6,10 +6,8 @@ An extention of the great Retrofit with integration of <a href="https://github.c
 ```java
 
     public static void main(String args[]) {
-	    Futurefit adapter = new Futurefit.Builder()
-	    	.setLogLevel(LogLevel.NONE)
-	    	.setEndpoint("https://www.google.com/")
-	      .setConverter(new EstivateConvertor())
+	    Futurefit2 adapter = new Futurefit2.Builder()
+	    	.baseUrl("https://www.google.com/")
 	      .build();
 		
 	    GoogleApi create = adapter.create(GoogleApi.class);
@@ -22,7 +20,7 @@ An extention of the great Retrofit with integration of <a href="https://github.c
 	public interface GoogleApi {
 	    @Estivate
 	    @GET("/search?hl=en&safe=off")
-	    @Headers({ "User-Agent:Mozilla" })
+	    @Headers({ "User-Agent:Mozilla/5.0 Firefox/68.0" })
 	    public Page search(@Query("q") String query);
 	}
 	
@@ -38,11 +36,6 @@ An extention of the great Retrofit with integration of <a href="https://github.c
 <dependency>
 	<groupId>com.github.btheu.futurefit</groupId>
 	<artifactId>futurefit</artifactId>
-	<version>0.1.2</version>
+	<version>0.2.0</version>
 </dependency>
 ```
-## Changelog
-
-### 0.1.2 - 26/02/2017
-
-*	fix:custom request interceptor was hiden by Futurefit

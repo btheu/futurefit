@@ -7,10 +7,10 @@ import java.lang.reflect.Type;
 import java.net.URL;
 
 import futurefit2.convertor.BuiltInConverterFactory;
-import futurefit2.core.InterceptorProxyInvocationHandler;
 import futurefit2.core.ProxyRequestFacade;
 import futurefit2.core.RequestFacadeCallback;
 import futurefit2.core.UnboxCallAdapter;
+import futurefit2.core.interceptor.InterceptorProxyInvocationHandler;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;

@@ -4,7 +4,7 @@ import retrofit.RequestInterceptor;
 
 /**
  * <p>
- * RequestInterceptor doing nothing.
+ * MethodInterceptor doing nothing.
  * <p>
  * Usefull with {@link ComposedRequestInterceptor}
  * 

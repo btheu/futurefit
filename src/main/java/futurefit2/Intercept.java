@@ -6,12 +6,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import futurefit2.core.RequestInterceptor;
+import futurefit2.core.interceptor.MethodInterceptor;
 
 @Target({ METHOD })
 @Retention(RUNTIME)
 public @interface Intercept {
 
-    Class<? extends RequestInterceptor> handler();
+    Class<? extends MethodInterceptor> handler();
 
 }

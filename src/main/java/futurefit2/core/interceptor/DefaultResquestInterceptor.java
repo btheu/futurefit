@@ -3,7 +3,7 @@ package futurefit2.core.interceptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public class DefaultResquestInterceptor implements Interceptor {
+public class DefaultResquestInterceptor implements RequestInterceptor {
 
     @Override
     public Object intercept(RequestInvocation invocation) {

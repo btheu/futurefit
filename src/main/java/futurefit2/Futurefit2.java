@@ -118,6 +118,8 @@ public class Futurefit2 {
 
         T retrofitAdapter = this.retrofitBuilder.build().create(apiClass);
 
+        // TODO btheu Create Cache for every @Cacheable annotation
+
         return createInterceptorProxy(apiClass, retrofitAdapter, new RequestFacadeCallback() {
             @Override
             public void apply(ProxyRequestFacade requestFacade) {

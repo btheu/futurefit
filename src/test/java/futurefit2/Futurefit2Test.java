@@ -9,7 +9,7 @@ import org.junit.Test;
 import estivate.annotations.Select;
 import estivate.annotations.Text;
 import futurefit2.core.RequestFacade;
-import futurefit2.core.RequestInterceptor;
+import futurefit2.core.interceptor.MethodInterceptor;
 import junit.framework.TestCase;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -78,7 +78,7 @@ public class Futurefit2Test {
         Assert.assertNotEquals("", sentence.trim());
     }
 
-    public static class GoogleInterceptor implements RequestInterceptor {
+    public static class GoogleInterceptor implements MethodInterceptor {
         @Override
         public void intercept(RequestFacade requestFacade, Annotation[] annotations, Object response) {
 

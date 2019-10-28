@@ -2,7 +2,7 @@ package futurefit2.core.interceptor;
 
 import java.lang.reflect.Method;
 
-public interface Interceptor {
+public interface RequestInterceptor {
 
     Object intercept(RequestInvocation invocation);
 

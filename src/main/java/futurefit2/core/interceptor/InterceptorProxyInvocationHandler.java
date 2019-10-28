@@ -2,11 +2,12 @@ package futurefit2.core.interceptor;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import futurefit2.core.RequestFacadeCallback;
-import futurefit2.core.interceptor.Interceptor.RequestInvocation;
+import futurefit2.core.interceptor.RequestInterceptor.RequestInvocation;
 
 /**
  * 
@@ -27,14 +28,14 @@ public class InterceptorProxyInvocationHandler<T> implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        DefaultRequestInvocation dri = new DefaultRequestInvocation(delegate, method, args);
+        DefaultRequestInvocation dri = new DefaultRequestInvocation(delegate, method, args, callback);
 
         return dri.invoke();
     }
 
     public static class DefaultRequestInvocation implements RequestInvocation {
 
-        Iterator<? extends Interceptor> iterators;
+        Iterator<? extends RequestInterceptor> iterators;
 
         private boolean executed = false;
 
@@ -42,11 +43,16 @@ public class InterceptorProxyInvocationHandler<T> implements InvocationHandler {
         private Method   method;
         private Object[] args;
 
-        public DefaultRequestInvocation(Object target, Method method, Object[] args) {
+        public DefaultRequestInvocation(Object target, Method method, Object[] args, RequestFacadeCallback callback) {
             this.target = target;
             this.method = method;
             this.args = args;
-            iterators = Collections.singleton(new DefaultResquestInterceptor()).iterator();
+
+            List<RequestInterceptor> list = new ArrayList<RequestInterceptor>();
+            list.add(new DefaultMethodInterceptor(callback));
+            list.add(new DefaultResquestInterceptor());
+
+            iterators = list.iterator();
         }
 
         @Override
@@ -55,7 +61,7 @@ public class InterceptorProxyInvocationHandler<T> implements InvocationHandler {
                 throw new RuntimeException("Execution was already made");
             }
 
-            Interceptor next = iterators.next();
+            RequestInterceptor next = iterators.next();
 
             return next.intercept(DefaultRequestInvocation.this);
         }

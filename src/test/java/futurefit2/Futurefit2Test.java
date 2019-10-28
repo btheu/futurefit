@@ -40,7 +40,7 @@ public class Futurefit2Test {
 
         GoogleApi create = build.create(GoogleApi.class);
 
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 10; i++) {
             create.searchCached("estivate");
             Thread.sleep(1 * 1000);
         }

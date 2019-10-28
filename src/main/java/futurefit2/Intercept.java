@@ -8,6 +8,11 @@ import java.lang.annotation.Target;
 
 import futurefit2.core.interceptor.MethodInterceptor;
 
+/**
+ * 
+ * @author Benoit Theunissen
+ *
+ */
 @Target({ METHOD })
 @Retention(RUNTIME)
 public @interface Intercept {

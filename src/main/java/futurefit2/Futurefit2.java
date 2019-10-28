@@ -6,7 +6,11 @@ import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.net.URL;
 
+import org.ehcache.CacheManager;
+import org.ehcache.config.builders.CacheManagerBuilder;
+
 import futurefit2.convertor.BuiltInConverterFactory;
+import futurefit2.core.CacheInitializator;
 import futurefit2.core.ProxyRequestFacade;
 import futurefit2.core.RequestFacadeCallback;
 import futurefit2.core.UnboxCallAdapter;
@@ -33,6 +37,8 @@ public class Futurefit2 {
     private final Retrofit.Builder retrofitBuilder;
 
     private final RequestUpdateInterceptor requestUpdateInterceptor;
+
+    private final CacheManager cacheManager;
 
     private static CallAdapter.Factory callAdapterFactory = new CallAdapter.Factory() {
         @Override
@@ -63,6 +69,8 @@ public class Futurefit2 {
 
         protected final RequestUpdateInterceptor requestUpdateInterceptor = new RequestUpdateInterceptor();
         protected final HttpLoggingInterceptor   loggingInterceptor       = new HttpLoggingInterceptor();
+
+        protected CacheManager cacheManager;
 
         public Builder() {
             this.retrofitBuilder.addConverterFactory(BuiltInConverterFactory.create());
@@ -98,27 +106,38 @@ public class Futurefit2 {
             return this;
         };
 
+        public Builder cacheManager(CacheManager cacheManager) {
+            this.cacheManager = cacheManager;
+            return this;
+        }
+
         public Futurefit2 build() {
             clientBuilder //
                     .addNetworkInterceptor(requestUpdateInterceptor) //
                     .addNetworkInterceptor(loggingInterceptor);
 
+            if (cacheManager == null) {
+                cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build();
+            }
+
             this.retrofitBuilder.client(clientBuilder.build());
-            return new Futurefit2(this.retrofitBuilder, requestUpdateInterceptor);
+            return new Futurefit2(this.retrofitBuilder, requestUpdateInterceptor, cacheManager);
         }
 
     }
 
-    private Futurefit2(retrofit2.Retrofit.Builder retrofitBuilder, RequestUpdateInterceptor requestUpdateInterceptor) {
+    private Futurefit2(retrofit2.Retrofit.Builder retrofitBuilder, RequestUpdateInterceptor requestUpdateInterceptor,
+            CacheManager cacheManager) {
         this.retrofitBuilder = retrofitBuilder;
         this.requestUpdateInterceptor = requestUpdateInterceptor;
+        this.cacheManager = cacheManager;
     }
 
     public <T> T create(Class<T> apiClass) {
 
         T retrofitAdapter = this.retrofitBuilder.build().create(apiClass);
 
-        // TODO btheu Create Cache for every @Cacheable annotation
+        CacheInitializator.init(apiClass, cacheManager);
 
         return createInterceptorProxy(apiClass, retrofitAdapter, new RequestFacadeCallback() {
             @Override
@@ -130,9 +149,9 @@ public class Futurefit2 {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T createInterceptorProxy(Class<T> targetInterface, T delegate, RequestFacadeCallback callback) {
+    private <T> T createInterceptorProxy(Class<T> targetInterface, T delegate, RequestFacadeCallback callback) {
         return (T) Proxy.newProxyInstance(targetInterface.getClassLoader(), new Class<?>[] { targetInterface },
-                new InterceptorProxyInvocationHandler<T>(delegate, callback));
+                new InterceptorProxyInvocationHandler<T>(delegate, callback, this.cacheManager));
     }
 
     public static class RequestUpdateInterceptor implements Interceptor {

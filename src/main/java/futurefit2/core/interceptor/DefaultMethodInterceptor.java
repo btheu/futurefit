@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import futurefit2.Intercept;
 import futurefit2.core.ProxyRequestFacade;
 import futurefit2.core.RequestFacadeCallback;
+import futurefit2.utils.ReflectionUtil;
 
 public class DefaultMethodInterceptor implements RequestInterceptor {
 
@@ -24,23 +25,20 @@ public class DefaultMethodInterceptor implements RequestInterceptor {
             Method method = invocation.method();
 
             Annotation[] annotations = method.getAnnotations();
-            for (Annotation annotation : annotations) {
-                if (annotation.annotationType().isAssignableFrom(Intercept.class)) {
-                    Intercept interceptAnnotation = (Intercept) annotation;
 
-                    Class<? extends MethodInterceptor> handler = interceptAnnotation.handler();
-                    if (method != null) {
-                        MethodInterceptor newInstance = handler.newInstance();
+            Intercept interceptAnnotation = ReflectionUtil.findAnnotation(Intercept.class, annotations);
+            if (interceptAnnotation != null && interceptAnnotation.handler() != null) {
 
-                        ProxyRequestFacade requestFacade = new ProxyRequestFacade();
+                Class<? extends MethodInterceptor> handler = interceptAnnotation.handler();
+                MethodInterceptor newInstance = handler.newInstance();
 
-                        newInstance.intercept(requestFacade, annotations, response);
+                ProxyRequestFacade requestFacade = new ProxyRequestFacade();
 
-                        callback.apply(requestFacade);
-                    }
+                newInstance.intercept(requestFacade, annotations, response);
 
-                }
+                callback.apply(requestFacade);
             }
+
         } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e.getMessage(), e);
         }

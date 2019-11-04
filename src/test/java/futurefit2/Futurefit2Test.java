@@ -2,6 +2,7 @@ package futurefit2;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.util.concurrent.TimeUnit;
 
 import org.ehcache.CacheManager;
 import org.ehcache.config.builders.CacheManagerBuilder;
@@ -29,6 +30,24 @@ import retrofit2.http.Query;
  */
 @Slf4j
 public class Futurefit2Test {
+
+    @Test
+    public void testRateLimiter() throws IOException, InterruptedException {
+
+        Futurefit2 build = new Futurefit2.Builder().log(Level.BASIC).baseUrl("https://www.google.com/")//
+                .withRateLimiter(2, 3, TimeUnit.SECONDS).build();
+
+        GoogleApi create = build.create(GoogleApi.class);
+
+        for (int i = 0; i < 10; i++) {
+            String stats = create.searchCached("estivate").getResultStatistics();
+
+            this.assertNotEmpty(stats);
+
+            log.info("Statistics [{}]", stats);
+        }
+
+    }
 
     @Test
     public void testCache() throws IOException, InterruptedException {

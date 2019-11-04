@@ -8,6 +8,8 @@ import java.util.List;
 
 import org.ehcache.CacheManager;
 
+import com.google.common.util.concurrent.RateLimiter;
+
 import futurefit2.core.RequestFacadeCallback;
 import futurefit2.core.interceptor.RequestInterceptor.RequestInvocation;
 
@@ -25,15 +27,20 @@ public class InterceptorProxyInvocationHandler<T> implements InvocationHandler {
 
     private CacheManager cacheManager;
 
-    public InterceptorProxyInvocationHandler(T delegate, RequestFacadeCallback callback, CacheManager cacheManager) {
+    private RateLimiter rateLimiter;
+
+    public InterceptorProxyInvocationHandler(T delegate, RequestFacadeCallback callback, CacheManager cacheManager,
+            RateLimiter rateLimiter) {
         this.delegate = delegate;
         this.callback = callback;
         this.cacheManager = cacheManager;
+        this.rateLimiter = rateLimiter;
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        DefaultRequestInvocation dri = new DefaultRequestInvocation(delegate, method, args, callback, cacheManager);
+        DefaultRequestInvocation dri = new DefaultRequestInvocation(delegate, method, args, callback, cacheManager,
+                rateLimiter);
 
         return dri.invoke();
     }
@@ -49,7 +56,7 @@ public class InterceptorProxyInvocationHandler<T> implements InvocationHandler {
         private Object[] args;
 
         public DefaultRequestInvocation(Object target, Method method, Object[] args, RequestFacadeCallback callback,
-                CacheManager cacheManager) {
+                CacheManager cacheManager, RateLimiter rateLimiter) {
             this.target = target;
             this.method = method;
             this.args = args;
@@ -57,6 +64,7 @@ public class InterceptorProxyInvocationHandler<T> implements InvocationHandler {
             List<RequestInterceptor> list = new ArrayList<RequestInterceptor>();
             list.add(new DefaultMethodInterceptor(callback));
             list.add(new DefaultCacheableInterceptor(cacheManager));
+            list.add(new DefaultRateLimiterInterceptor(rateLimiter));
             list.add(new DefaultResquestInterceptor());
 
             iterators = list.iterator();

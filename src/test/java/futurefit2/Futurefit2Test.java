@@ -35,12 +35,12 @@ public class Futurefit2Test {
     public void testRateLimiter() throws IOException, InterruptedException {
 
         Futurefit2 build = new Futurefit2.Builder().log(Level.BASIC).baseUrl("https://www.google.com/")//
-                .withRateLimiter(2, 3, TimeUnit.SECONDS).build();
+                .withRateLimiter(1, 3, TimeUnit.SECONDS).build();
 
         GoogleApi create = build.create(GoogleApi.class);
 
-        for (int i = 0; i < 10; i++) {
-            String stats = create.searchCached("estivate").getResultStatistics();
+        for (int i = 0; i < 4; i++) {
+            String stats = create.searchDirect("estivate").getResultStatistics();
 
             this.assertNotEmpty(stats);
 

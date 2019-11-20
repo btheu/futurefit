@@ -5,6 +5,7 @@ import java.time.Duration;
 
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
+import org.ehcache.Status;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.ExpiryPolicyBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
@@ -16,7 +17,9 @@ public class CacheInitializator {
 
     public static void init(Class<?> apiClass, CacheManager cacheManager) {
 
-        cacheManager.init();
+        if (cacheManager.getStatus() != Status.AVAILABLE) {
+            cacheManager.init();
+        }
 
         for (Method method : apiClass.getDeclaredMethods()) {
             Cacheable findAnnotation = ReflectionUtil.findAnnotation(Cacheable.class, method.getAnnotations());

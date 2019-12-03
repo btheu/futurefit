@@ -65,6 +65,11 @@ public class OkHttpUtil {
         public byte[] getBytes() {
             return byteArray;
         }
+
+        @Override
+        public long contentLength() throws IOException {
+            return byteArray.length;
+        }
     }
 
     public static class TypedBytesResponseBody extends ResponseBody {

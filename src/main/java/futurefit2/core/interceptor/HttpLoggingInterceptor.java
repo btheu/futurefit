@@ -3,10 +3,7 @@ package futurefit2.core.interceptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.List;
-import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import futurefit2.utils.OkHttpUtil;
 import futurefit2.utils.OkHttpUtil.TypedBytesRequestBody;
@@ -18,6 +15,9 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import okio.Buffer;
+import okio.BufferedSource;
+import okio.GzipSource;
 
 public class HttpLoggingInterceptor implements Interceptor {
 
@@ -64,9 +64,7 @@ public class HttpLoggingInterceptor implements Interceptor {
         log.log(String.format("---> %s %s %s", name, request.method(), request.url()));
 
         if (level.ordinal() >= Level.HEADERS.ordinal()) {
-            for (Entry<String, List<String>> header : request.headers().toMultimap().entrySet()) {
-                log.log(toString(header));
-            }
+            log.log(request.headers().toString());
 
             String bodySize = "no";
             RequestBody body = request.body();
@@ -108,10 +106,6 @@ public class HttpLoggingInterceptor implements Interceptor {
         return request;
     }
 
-    private String toString(Entry<String, List<String>> header) {
-        return header.getKey() + ": " + header.getValue().stream().collect(Collectors.joining("; "));
-    }
-
     /**
      * Log response headers and body. Consumes response body and returns identical
      * replacement.
@@ -120,9 +114,7 @@ public class HttpLoggingInterceptor implements Interceptor {
         log.log(String.format("<--- HTTP %s %s (%sms)", response.code(), url, elapsedTime));
 
         if (level.ordinal() >= Level.HEADERS.ordinal()) {
-            for (Entry<String, List<String>> header : response.headers().toMultimap().entrySet()) {
-                log.log(toString(header));
-            }
+            log.log(response.headers().toString());
 
             long bodySize = 0;
             ResponseBody body = response.body();
@@ -138,10 +130,22 @@ public class HttpLoggingInterceptor implements Interceptor {
                         // Read the entire response body so we can log it and replace the original
                         // response
                         response = OkHttpUtil.readBodyToBytesIfNecessary(response);
+
                         body = response.body();
                     }
 
-                    byte[] bodyBytes = ((TypedBytesResponseBody) body).bytes();
+                    BufferedSource bodySources = ((TypedBytesResponseBody) body).source();
+                    byte[] bodyBytes;
+                    if ("gzip".equalsIgnoreCase(response.headers().get("Content-Encoding"))) {
+                        GzipSource gzipSource = new GzipSource(bodySources);
+                        Buffer buffer = new Buffer();
+                        buffer.writeAll(gzipSource);
+                        bodyBytes = buffer.readByteArray();
+                        buffer.close();
+                    } else {
+                        bodyBytes = bodySources.readByteArray();
+                    }
+
                     bodySize = bodyBytes.length;
                     log.log(new String(bodyBytes, "UTF-8"));
                 }

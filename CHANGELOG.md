@@ -1,7 +1,12 @@
 
-## 0.2.1 - pending
+## 0.3.0 - pending
 
 *	
+
+## 0.2.1 - 25/09/2019
+
+*	add OkHttp logging dependency
+*	update dependencies
 
 ## 0.2.0 - 02/08/2019
 

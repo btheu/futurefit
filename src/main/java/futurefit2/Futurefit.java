@@ -18,14 +18,14 @@ import futurefit2.core.CacheInitializator;
 import futurefit2.core.ProxyRequestFacade;
 import futurefit2.core.RequestFacadeCallback;
 import futurefit2.core.UnboxCallAdapter;
+import futurefit2.core.interceptor.HttpLoggingInterceptor;
+import futurefit2.core.interceptor.HttpLoggingInterceptor.Level;
 import futurefit2.core.interceptor.InterceptorProxyInvocationHandler;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
-import okhttp3.logging.HttpLoggingInterceptor;
-import okhttp3.logging.HttpLoggingInterceptor.Level;
 import retrofit2.Call;
 import retrofit2.CallAdapter;
 import retrofit2.Retrofit;
@@ -36,7 +36,7 @@ import retrofit2.Retrofit;
  *
  */
 @Slf4j
-public class Futurefit2 {
+public class Futurefit {
 
     private final Retrofit.Builder retrofitBuilder;
 
@@ -146,7 +146,7 @@ public class Futurefit2 {
             return this;
         }
 
-        public Futurefit2 build() {
+        public Futurefit build() {
             clientBuilder //
                     .addNetworkInterceptor(requestUpdateInterceptor) //
                     .addNetworkInterceptor(loggingInterceptor);
@@ -158,12 +158,12 @@ public class Futurefit2 {
                 rateLimiter = RateLimiter.create(10);
             }
             this.retrofitBuilder.client(clientBuilder.build());
-            return new Futurefit2(this.retrofitBuilder, requestUpdateInterceptor, cacheManager, rateLimiter);
+            return new Futurefit(this.retrofitBuilder, requestUpdateInterceptor, cacheManager, rateLimiter);
         }
 
     }
 
-    private Futurefit2(retrofit2.Retrofit.Builder retrofitBuilder, RequestUpdateInterceptor requestUpdateInterceptor,
+    private Futurefit(retrofit2.Retrofit.Builder retrofitBuilder, RequestUpdateInterceptor requestUpdateInterceptor,
             CacheManager cacheManager, RateLimiter rateLimiter) {
         this.retrofitBuilder = retrofitBuilder;
         this.requestUpdateInterceptor = requestUpdateInterceptor;

@@ -7,7 +7,7 @@
 	</parent>
 	<groupId>com.github.btheu.futurefit</groupId>
 	<artifactId>futurefit</artifactId>
-	<version>0.2.1</version>
+	<version>0.3.0.M1</version>
 	<url>http://github.com/btheu/futurefit/</url>
 	<inceptionYear>2016</inceptionYear>
 	<description>An extension of the great retrofit</description>
@@ -30,12 +30,12 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.24</version>
+			<version>1.7.28</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.7.24</version>
+			<version>1.7.28</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -45,6 +45,17 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.11.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>3.14.2</version>
+		</dependency>
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
 			<artifactId>logging-interceptor</artifactId>
@@ -65,13 +76,24 @@
 		<dependency>
 			<groupId>com.github.btheu.estivate</groupId>
 			<artifactId>estivate</artifactId>
-			<version>0.3.7</version>
+			<version>0.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.squareup.retrofit</groupId>
 			<artifactId>retrofit</artifactId>
 			<version>1.9.0</version>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.ehcache</groupId>
+			<artifactId>ehcache</artifactId>
+			<version>3.8.1</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>28.1-jre</version>
 		</dependency>
 
 	</dependencies>

@@ -5,12 +5,20 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.net.URL;
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+
+import org.ehcache.CacheManager;
+import org.ehcache.config.builders.CacheManagerBuilder;
+
+import com.google.common.util.concurrent.RateLimiter;
 
 import futurefit2.convertor.BuiltInConverterFactory;
-import futurefit2.core.InterceptorProxyInvocationHandler;
+import futurefit2.core.CacheInitializator;
 import futurefit2.core.ProxyRequestFacade;
 import futurefit2.core.RequestFacadeCallback;
 import futurefit2.core.UnboxCallAdapter;
+import futurefit2.core.interceptor.InterceptorProxyInvocationHandler;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
@@ -33,6 +41,9 @@ public class Futurefit2 {
     private final Retrofit.Builder retrofitBuilder;
 
     private final RequestUpdateInterceptor requestUpdateInterceptor;
+
+    private final CacheManager cacheManager;
+    private final RateLimiter  rateLimiter;
 
     private static CallAdapter.Factory callAdapterFactory = new CallAdapter.Factory() {
         @Override
@@ -64,6 +75,9 @@ public class Futurefit2 {
         protected final RequestUpdateInterceptor requestUpdateInterceptor = new RequestUpdateInterceptor();
         protected final HttpLoggingInterceptor   loggingInterceptor       = new HttpLoggingInterceptor();
 
+        protected CacheManager cacheManager = null;
+        protected RateLimiter  rateLimiter  = null;
+
         public Builder() {
             this.retrofitBuilder.addConverterFactory(BuiltInConverterFactory.create());
             this.retrofitBuilder.addCallAdapterFactory(callAdapterFactory);
@@ -71,52 +85,97 @@ public class Futurefit2 {
 
         public Retrofit.Builder retrofit() {
             return retrofitBuilder;
-        };
+        }
 
         public Builder client(OkHttpClient client) {
             clientBuilder = client.newBuilder();
             return this;
-        };
+        }
 
         public Builder baseUrl(String baseUrl) {
             this.retrofitBuilder.baseUrl(baseUrl);
             return this;
-        };
+        }
 
         public Builder baseUrl(URL baseUrl) {
             this.retrofitBuilder.baseUrl(baseUrl);
             return this;
-        };
+        }
 
         public Builder baseUrl(HttpUrl baseUrl) {
             this.retrofitBuilder.baseUrl(baseUrl);
             return this;
-        };
+        }
 
         public Builder log(Level level) {
             loggingInterceptor.setLevel(level);
             return this;
-        };
+        }
+
+        public Builder cacheManager(CacheManager cacheManager) {
+            this.cacheManager = cacheManager;
+            return this;
+        }
+
+        public Builder withRateLimiter(RateLimiter rateLimiter) {
+            this.rateLimiter = rateLimiter;
+            return this;
+        }
+
+        /**
+         * @see RateLimiter#create(double)
+         */
+        public Builder withRateLimiter(double permitsPerSecond) {
+            this.rateLimiter = RateLimiter.create(permitsPerSecond);
+            return this;
+        }
+
+        /**
+         * @see RateLimiter#create(double, Duration)
+         */
+        public Builder withRateLimiter(double permitsPerSecond, Duration warmupPeriod) {
+            this.rateLimiter = RateLimiter.create(permitsPerSecond, warmupPeriod);
+            return this;
+        }
+
+        /**
+         * @see RateLimiter#create(double, long, TimeUnit)
+         */
+        public Builder withRateLimiter(double permitsPerSecond, long warmupPeriod, TimeUnit unit) {
+            this.rateLimiter = RateLimiter.create(permitsPerSecond, warmupPeriod, unit);
+            return this;
+        }
 
         public Futurefit2 build() {
             clientBuilder //
                     .addNetworkInterceptor(requestUpdateInterceptor) //
                     .addNetworkInterceptor(loggingInterceptor);
 
+            if (cacheManager == null) {
+                cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build();
+            }
+            if (rateLimiter == null) {
+                rateLimiter = RateLimiter.create(10);
+            }
             this.retrofitBuilder.client(clientBuilder.build());
-            return new Futurefit2(this.retrofitBuilder, requestUpdateInterceptor);
+            return new Futurefit2(this.retrofitBuilder, requestUpdateInterceptor, cacheManager, rateLimiter);
         }
 
     }
 
-    private Futurefit2(retrofit2.Retrofit.Builder retrofitBuilder, RequestUpdateInterceptor requestUpdateInterceptor) {
+    private Futurefit2(retrofit2.Retrofit.Builder retrofitBuilder, RequestUpdateInterceptor requestUpdateInterceptor,
+            CacheManager cacheManager, RateLimiter rateLimiter) {
         this.retrofitBuilder = retrofitBuilder;
         this.requestUpdateInterceptor = requestUpdateInterceptor;
+        this.cacheManager = cacheManager;
+        this.rateLimiter = rateLimiter;
     }
 
     public <T> T create(Class<T> apiClass) {
 
         T retrofitAdapter = this.retrofitBuilder.build().create(apiClass);
+
+        CacheInitializator.init(apiClass, cacheManager);
 
         return createInterceptorProxy(apiClass, retrofitAdapter, new RequestFacadeCallback() {
             @Override
@@ -128,9 +187,9 @@ public class Futurefit2 {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T createInterceptorProxy(Class<T> targetInterface, T delegate, RequestFacadeCallback callback) {
+    private <T> T createInterceptorProxy(Class<T> targetInterface, T delegate, RequestFacadeCallback callback) {
         return (T) Proxy.newProxyInstance(targetInterface.getClassLoader(), new Class<?>[] { targetInterface },
-                new InterceptorProxyInvocationHandler<T>(delegate, callback));
+                new InterceptorProxyInvocationHandler<T>(delegate, callback, this.cacheManager, this.rateLimiter));
     }
 
     public static class RequestUpdateInterceptor implements Interceptor {

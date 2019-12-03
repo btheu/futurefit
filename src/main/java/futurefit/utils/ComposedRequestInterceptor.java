@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import retrofit.RequestInterceptor;
 
 /**
- * Usefull for aggregating {@link RequestInterceptor}
+ * Usefull for aggregating {@link MethodInterceptor}
  * 
  * @author Benoit Theunissen
  *

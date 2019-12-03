@@ -1,7 +1,8 @@
 
 ## 0.3.0 - pending
 
-*	
+*	add custum logging implementation (based on retrofit1 implementation)
+*	remove Futurefit 1 implementation
 
 ## 0.2.1 - 25/09/2019
 

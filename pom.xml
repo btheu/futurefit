@@ -5,7 +5,7 @@
 		<artifactId>oss-parent</artifactId>
 		<version>9</version>
 	</parent>
-	<groupId>com.github.btheu.futurefit</groupId>
+	<groupId>com.github.btheu.futurefit2</groupId>
 	<artifactId>futurefit</artifactId>
 	<version>0.3.0.M2-SNAPSHOT</version>
 	<url>http://github.com/btheu/futurefit/</url>

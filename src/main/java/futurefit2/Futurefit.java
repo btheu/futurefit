@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
 import java.net.URL;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -23,8 +25,10 @@ import futurefit2.core.interceptor.HttpLoggingInterceptor.Level;
 import futurefit2.core.interceptor.InterceptorProxyInvocationHandler;
 import futurefit2.core.interceptor.UserAgentInterceptor;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
+import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
 import retrofit2.Call;
@@ -77,6 +81,7 @@ public class Futurefit {
         protected final RequestUpdateInterceptor requestUpdateInterceptor = new RequestUpdateInterceptor();
         protected final HttpLoggingInterceptor   loggingInterceptor       = new HttpLoggingInterceptor();
 
+        protected CookieJar    cookieJar    = null;
         protected CacheManager cacheManager = null;
         protected RateLimiter  rateLimiter  = null;
 
@@ -93,32 +98,44 @@ public class Futurefit {
         }
 
         public Builder client(OkHttpClient client) {
+            assert client != null;
             clientBuilder = client.newBuilder();
             return this;
         }
 
         public Builder baseUrl(String baseUrl) {
+            assert baseUrl != null;
             this.retrofitBuilder.baseUrl(baseUrl);
             return this;
         }
 
         public Builder baseUrl(URL baseUrl) {
+            assert baseUrl != null;
             this.retrofitBuilder.baseUrl(baseUrl);
             return this;
         }
 
         public Builder baseUrl(HttpUrl baseUrl) {
+            assert baseUrl != null;
             this.retrofitBuilder.baseUrl(baseUrl);
             return this;
         }
 
         public Builder log(Level level) {
+            assert level != null;
             loggingInterceptor.setLevel(level);
             return this;
         }
 
         public Builder userAgent(String userAgent) {
+            assert userAgent != null;
             this.userAgent = userAgent;
+            return this;
+        }
+
+        public Builder cookieJar(CookieJar cookieJar) {
+            assert cookieJar != null;
+            this.cookieJar = cookieJar;
             return this;
         }
 
@@ -171,6 +188,14 @@ public class Futurefit {
             if (rateLimiter == null) {
                 rateLimiter = RateLimiter.create(10);
             }
+            if (cookieJar == null) {
+                // default cookieJar
+                CookieManager cookieManager = new CookieManager();
+                cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
+                cookieJar = new JavaNetCookieJar(cookieManager);
+            }
+            clientBuilder.cookieJar(cookieJar);
+
             this.retrofitBuilder.client(clientBuilder.build());
             return new Futurefit(this.retrofitBuilder, requestUpdateInterceptor, cacheManager, rateLimiter);
         }

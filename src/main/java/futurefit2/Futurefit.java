@@ -21,6 +21,7 @@ import futurefit2.core.UnboxCallAdapter;
 import futurefit2.core.interceptor.HttpLoggingInterceptor;
 import futurefit2.core.interceptor.HttpLoggingInterceptor.Level;
 import futurefit2.core.interceptor.InterceptorProxyInvocationHandler;
+import futurefit2.core.interceptor.UserAgentInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
@@ -78,6 +79,8 @@ public class Futurefit {
         protected CacheManager cacheManager = null;
         protected RateLimiter  rateLimiter  = null;
 
+        protected String userAgent = null;
+
         public Builder() {
             this.retrofitBuilder.addConverterFactory(BuiltInConverterFactory.create());
             this.retrofitBuilder.addCallAdapterFactory(callAdapterFactory);
@@ -109,6 +112,11 @@ public class Futurefit {
 
         public Builder log(Level level) {
             loggingInterceptor.setLevel(level);
+            return this;
+        }
+
+        public Builder userAgent(String userAgent) {
+            this.userAgent = userAgent;
             return this;
         }
 
@@ -147,6 +155,10 @@ public class Futurefit {
         }
 
         public Futurefit build() {
+            if (userAgent != null) {
+                clientBuilder //
+                        .addNetworkInterceptor(UserAgentInterceptor.build(userAgent));
+            }
             clientBuilder //
                     .addNetworkInterceptor(requestUpdateInterceptor) //
                     .addNetworkInterceptor(loggingInterceptor);

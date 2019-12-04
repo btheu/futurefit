@@ -30,6 +30,7 @@ import okhttp3.Response;
 import retrofit2.Call;
 import retrofit2.CallAdapter;
 import retrofit2.Retrofit;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * 
@@ -82,6 +83,7 @@ public class Futurefit {
         protected String userAgent = null;
 
         public Builder() {
+            this.retrofitBuilder.addConverterFactory(ScalarsConverterFactory.create());
             this.retrofitBuilder.addConverterFactory(BuiltInConverterFactory.create());
             this.retrofitBuilder.addCallAdapterFactory(callAdapterFactory);
         }

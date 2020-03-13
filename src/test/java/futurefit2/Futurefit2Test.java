@@ -165,7 +165,7 @@ public class Futurefit2Test {
     @Data
     public static class Page {
         // get the div holding statistics
-        @Select("#resultStats")
+        @Select("#result-stats")
         @Text
         public String resultStatistics;
     }

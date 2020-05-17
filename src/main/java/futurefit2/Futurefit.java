@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
 import java.net.URL;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -18,17 +20,21 @@ import futurefit2.core.CacheInitializator;
 import futurefit2.core.ProxyRequestFacade;
 import futurefit2.core.RequestFacadeCallback;
 import futurefit2.core.UnboxCallAdapter;
+import futurefit2.core.interceptor.HttpLoggingInterceptor;
+import futurefit2.core.interceptor.HttpLoggingInterceptor.Level;
 import futurefit2.core.interceptor.InterceptorProxyInvocationHandler;
+import futurefit2.core.interceptor.UserAgentInterceptor;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
+import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
-import okhttp3.logging.HttpLoggingInterceptor;
-import okhttp3.logging.HttpLoggingInterceptor.Level;
 import retrofit2.Call;
 import retrofit2.CallAdapter;
 import retrofit2.Retrofit;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * 
@@ -36,7 +42,7 @@ import retrofit2.Retrofit;
  *
  */
 @Slf4j
-public class Futurefit2 {
+public class Futurefit {
 
     private final Retrofit.Builder retrofitBuilder;
 
@@ -75,10 +81,14 @@ public class Futurefit2 {
         protected final RequestUpdateInterceptor requestUpdateInterceptor = new RequestUpdateInterceptor();
         protected final HttpLoggingInterceptor   loggingInterceptor       = new HttpLoggingInterceptor();
 
+        protected CookieJar    cookieJar    = null;
         protected CacheManager cacheManager = null;
         protected RateLimiter  rateLimiter  = null;
 
+        protected String userAgent = null;
+
         public Builder() {
+            this.retrofitBuilder.addConverterFactory(ScalarsConverterFactory.create());
             this.retrofitBuilder.addConverterFactory(BuiltInConverterFactory.create());
             this.retrofitBuilder.addCallAdapterFactory(callAdapterFactory);
         }
@@ -88,27 +98,44 @@ public class Futurefit2 {
         }
 
         public Builder client(OkHttpClient client) {
+            assert client != null;
             clientBuilder = client.newBuilder();
             return this;
         }
 
         public Builder baseUrl(String baseUrl) {
+            assert baseUrl != null;
             this.retrofitBuilder.baseUrl(baseUrl);
             return this;
         }
 
         public Builder baseUrl(URL baseUrl) {
+            assert baseUrl != null;
             this.retrofitBuilder.baseUrl(baseUrl);
             return this;
         }
 
         public Builder baseUrl(HttpUrl baseUrl) {
+            assert baseUrl != null;
             this.retrofitBuilder.baseUrl(baseUrl);
             return this;
         }
 
         public Builder log(Level level) {
+            assert level != null;
             loggingInterceptor.setLevel(level);
+            return this;
+        }
+
+        public Builder userAgent(String userAgent) {
+            assert userAgent != null;
+            this.userAgent = userAgent;
+            return this;
+        }
+
+        public Builder cookieJar(CookieJar cookieJar) {
+            assert cookieJar != null;
+            this.cookieJar = cookieJar;
             return this;
         }
 
@@ -146,7 +173,11 @@ public class Futurefit2 {
             return this;
         }
 
-        public Futurefit2 build() {
+        public Futurefit build() {
+            if (userAgent != null) {
+                clientBuilder //
+                        .addNetworkInterceptor(UserAgentInterceptor.build(userAgent));
+            }
             clientBuilder //
                     .addNetworkInterceptor(requestUpdateInterceptor) //
                     .addNetworkInterceptor(loggingInterceptor);
@@ -157,13 +188,21 @@ public class Futurefit2 {
             if (rateLimiter == null) {
                 rateLimiter = RateLimiter.create(10);
             }
+            if (cookieJar == null) {
+                // default cookieJar
+                CookieManager cookieManager = new CookieManager();
+                cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
+                cookieJar = new JavaNetCookieJar(cookieManager);
+            }
+            clientBuilder.cookieJar(cookieJar);
+
             this.retrofitBuilder.client(clientBuilder.build());
-            return new Futurefit2(this.retrofitBuilder, requestUpdateInterceptor, cacheManager, rateLimiter);
+            return new Futurefit(this.retrofitBuilder, requestUpdateInterceptor, cacheManager, rateLimiter);
         }
 
     }
 
-    private Futurefit2(retrofit2.Retrofit.Builder retrofitBuilder, RequestUpdateInterceptor requestUpdateInterceptor,
+    private Futurefit(retrofit2.Retrofit.Builder retrofitBuilder, RequestUpdateInterceptor requestUpdateInterceptor,
             CacheManager cacheManager, RateLimiter rateLimiter) {
         this.retrofitBuilder = retrofitBuilder;
         this.requestUpdateInterceptor = requestUpdateInterceptor;

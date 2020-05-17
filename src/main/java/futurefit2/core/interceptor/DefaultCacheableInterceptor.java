@@ -37,6 +37,10 @@ public class DefaultCacheableInterceptor implements RequestInterceptor {
             if (result == null) {
                 result = invocation.invoke();
 
+                if (result == null) {
+                    throw new NullPointerException("Cache value is null for cache key: " + key);
+                }
+
                 cache.put(key, result);
 
             }

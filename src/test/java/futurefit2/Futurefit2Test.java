@@ -13,12 +13,12 @@ import org.junit.Test;
 import estivate.annotations.Select;
 import estivate.annotations.Text;
 import futurefit2.core.RequestFacade;
+import futurefit2.core.interceptor.HttpLoggingInterceptor.Level;
 import futurefit2.core.interceptor.MethodInterceptor;
 import junit.framework.TestCase;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.ResponseBody;
-import okhttp3.logging.HttpLoggingInterceptor.Level;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
@@ -36,7 +36,7 @@ public class Futurefit2Test {
     @Test
     public void testRateLimiter() throws IOException, InterruptedException {
 
-        Futurefit2 build = new Futurefit2.Builder().log(Level.BASIC).baseUrl("https://www.google.fr")//
+        Futurefit build = new Futurefit.Builder().log(Level.BASIC).baseUrl("https://www.google.fr")//
                 .withRateLimiter(1, 3, TimeUnit.SECONDS).build();
 
         GoogleApi create = build.create(GoogleApi.class);
@@ -56,7 +56,7 @@ public class Futurefit2Test {
 
         CacheManager cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build();
 
-        Futurefit2 build = new Futurefit2.Builder().log(Level.BASIC).baseUrl("https://www.google.fr")//
+        Futurefit build = new Futurefit.Builder().log(Level.BASIC).baseUrl("https://www.google.fr")//
                 .cacheManager(cacheManager).build();
 
         GoogleApi create = build.create(GoogleApi.class);
@@ -76,7 +76,7 @@ public class Futurefit2Test {
     @Test
     public void test() throws IOException {
 
-        Futurefit2 build = new Futurefit2.Builder().log(Level.BASIC).baseUrl("https://www.google.fr").build();
+        Futurefit build = new Futurefit.Builder().log(Level.BASIC).baseUrl("https://www.google.fr").build();
 
         GoogleApi create = build.create(GoogleApi.class);
 
@@ -90,9 +90,9 @@ public class Futurefit2Test {
     @Test
     public void testDirect() throws IOException {
 
-        Futurefit2.Builder builder = new Futurefit2.Builder();
+        Futurefit.Builder builder = new Futurefit.Builder();
 
-        Futurefit2 build = builder.baseUrl("https://www.google.fr").build();
+        Futurefit build = builder.baseUrl("https://www.google.fr").build();
 
         GoogleApi create = build.create(GoogleApi.class);
 
@@ -105,9 +105,9 @@ public class Futurefit2Test {
 
     @Test
     public void testResponse() throws IOException {
-        Futurefit2.Builder builder = new Futurefit2.Builder();
+        Futurefit.Builder builder = new Futurefit.Builder();
 
-        Futurefit2 build = builder.baseUrl("https://www.google.fr").build();
+        Futurefit build = builder.baseUrl("https://www.google.fr").build();
 
         GoogleApi create = build.create(GoogleApi.class);
 
@@ -165,7 +165,7 @@ public class Futurefit2Test {
     @Data
     public static class Page {
         // get the div holding statistics
-        @Select("#resultStats")
+        @Select("#result-stats")
         @Text
         public String resultStatistics;
     }

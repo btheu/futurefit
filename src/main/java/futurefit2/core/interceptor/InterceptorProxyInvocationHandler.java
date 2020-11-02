@@ -29,18 +29,21 @@ public class InterceptorProxyInvocationHandler<T> implements InvocationHandler {
 
     private RateLimiter rateLimiter;
 
+    private List<RequestInterceptor> interceptors;
+
     public InterceptorProxyInvocationHandler(T delegate, RequestFacadeCallback callback, CacheManager cacheManager,
-            RateLimiter rateLimiter) {
+            RateLimiter rateLimiter, List<RequestInterceptor> interceptors) {
         this.delegate = delegate;
         this.callback = callback;
         this.cacheManager = cacheManager;
         this.rateLimiter = rateLimiter;
+        this.interceptors = interceptors;
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         DefaultRequestInvocation dri = new DefaultRequestInvocation(delegate, method, args, callback, cacheManager,
-                rateLimiter);
+                rateLimiter, interceptors);
 
         return dri.invoke();
     }
@@ -56,16 +59,17 @@ public class InterceptorProxyInvocationHandler<T> implements InvocationHandler {
         private Object[] args;
 
         public DefaultRequestInvocation(Object target, Method method, Object[] args, RequestFacadeCallback callback,
-                CacheManager cacheManager, RateLimiter rateLimiter) {
+                CacheManager cacheManager, RateLimiter rateLimiter, List<RequestInterceptor> interceptors) {
             this.target = target;
             this.method = method;
             this.args = args;
 
             List<RequestInterceptor> list = new ArrayList<RequestInterceptor>();
+            list.addAll(interceptors);
             list.add(new DefaultMethodInterceptor(callback));
             list.add(new DefaultCacheableInterceptor(cacheManager));
             list.add(new DefaultRateLimiterInterceptor(rateLimiter));
-            list.add(new DefaultResquestInterceptor());
+            list.add(new DefaultRequestInterceptor());
 
             iterators = list.iterator();
         }

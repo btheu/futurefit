@@ -8,6 +8,8 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.URL;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.ehcache.CacheManager;
@@ -23,6 +25,7 @@ import futurefit2.core.UnboxCallAdapter;
 import futurefit2.core.interceptor.HttpLoggingInterceptor;
 import futurefit2.core.interceptor.HttpLoggingInterceptor.Level;
 import futurefit2.core.interceptor.InterceptorProxyInvocationHandler;
+import futurefit2.core.interceptor.RequestInterceptor;
 import futurefit2.core.interceptor.UserAgentInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.CookieJar;
@@ -50,6 +53,8 @@ public class Futurefit {
 
     private final CacheManager cacheManager;
     private final RateLimiter  rateLimiter;
+
+    private final List<RequestInterceptor> interceptors;
 
     private static CallAdapter.Factory callAdapterFactory = new CallAdapter.Factory() {
         @Override
@@ -86,6 +91,8 @@ public class Futurefit {
         protected RateLimiter  rateLimiter  = null;
 
         protected String userAgent = null;
+
+        protected List<RequestInterceptor> interceptors = new ArrayList<>();
 
         public Builder() {
             this.retrofitBuilder.addConverterFactory(ScalarsConverterFactory.create());
@@ -144,6 +151,11 @@ public class Futurefit {
             return this;
         }
 
+        public Builder addInterceptor(RequestInterceptor interceptor) {
+            this.interceptors.add(interceptor);
+            return this;
+        }
+
         public Builder withRateLimiter(RateLimiter rateLimiter) {
             this.rateLimiter = rateLimiter;
             return this;
@@ -197,17 +209,19 @@ public class Futurefit {
             clientBuilder.cookieJar(cookieJar);
 
             this.retrofitBuilder.client(clientBuilder.build());
-            return new Futurefit(this.retrofitBuilder, requestUpdateInterceptor, cacheManager, rateLimiter);
+            return new Futurefit(this.retrofitBuilder, requestUpdateInterceptor, cacheManager, rateLimiter,
+                    interceptors);
         }
 
     }
 
     private Futurefit(retrofit2.Retrofit.Builder retrofitBuilder, RequestUpdateInterceptor requestUpdateInterceptor,
-            CacheManager cacheManager, RateLimiter rateLimiter) {
+            CacheManager cacheManager, RateLimiter rateLimiter, List<RequestInterceptor> interceptors2) {
         this.retrofitBuilder = retrofitBuilder;
         this.requestUpdateInterceptor = requestUpdateInterceptor;
         this.cacheManager = cacheManager;
         this.rateLimiter = rateLimiter;
+        this.interceptors = interceptors2;
     }
 
     public <T> T create(Class<T> apiClass) {
@@ -228,7 +242,8 @@ public class Futurefit {
     @SuppressWarnings("unchecked")
     private <T> T createInterceptorProxy(Class<T> targetInterface, T delegate, RequestFacadeCallback callback) {
         return (T) Proxy.newProxyInstance(targetInterface.getClassLoader(), new Class<?>[] { targetInterface },
-                new InterceptorProxyInvocationHandler<T>(delegate, callback, this.cacheManager, this.rateLimiter));
+                new InterceptorProxyInvocationHandler<T>(delegate, callback, this.cacheManager, this.rateLimiter,
+                        this.interceptors));
     }
 
     public static class RequestUpdateInterceptor implements Interceptor {

@@ -23,4 +23,8 @@ public class FuturefitException extends RuntimeException {
         this.method = method;
     }
 
+    public String getMethodSimpleName() {
+        return method.getDeclaringClass().getSimpleName() + "." + method.getName();
+    }
+
 }

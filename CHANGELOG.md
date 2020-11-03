@@ -1,6 +1,10 @@
 
 ## 0.3.1-SNAPSHOT - pending
 
+*	build: update dependencies
+*	add RequestInterceptor to FutureFit builder
+*	add DefaultExceptionInterceptor with compiled Url
+
 ## 0.3.0 - 2020-05-17
 
 *	build: update dependencies

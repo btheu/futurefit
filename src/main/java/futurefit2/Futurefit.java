@@ -47,6 +47,8 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 @Slf4j
 public class Futurefit {
 
+    private final String baseUrl;
+
     private final Retrofit.Builder retrofitBuilder;
 
     private final RequestUpdateInterceptor requestUpdateInterceptor;
@@ -90,6 +92,7 @@ public class Futurefit {
         protected CacheManager cacheManager = null;
         protected RateLimiter  rateLimiter  = null;
 
+        protected String baseUrl   = null;
         protected String userAgent = null;
 
         protected List<RequestInterceptor> interceptors = new ArrayList<>();
@@ -112,18 +115,21 @@ public class Futurefit {
 
         public Builder baseUrl(String baseUrl) {
             assert baseUrl != null;
+            this.baseUrl = baseUrl;
             this.retrofitBuilder.baseUrl(baseUrl);
             return this;
         }
 
         public Builder baseUrl(URL baseUrl) {
             assert baseUrl != null;
+            this.baseUrl = baseUrl.toString();
             this.retrofitBuilder.baseUrl(baseUrl);
             return this;
         }
 
         public Builder baseUrl(HttpUrl baseUrl) {
             assert baseUrl != null;
+            this.baseUrl = baseUrl.toString();
             this.retrofitBuilder.baseUrl(baseUrl);
             return this;
         }
@@ -147,16 +153,19 @@ public class Futurefit {
         }
 
         public Builder cacheManager(CacheManager cacheManager) {
+            assert cacheManager != null;
             this.cacheManager = cacheManager;
             return this;
         }
 
         public Builder addInterceptor(RequestInterceptor interceptor) {
+            assert interceptor != null;
             this.interceptors.add(interceptor);
             return this;
         }
 
         public Builder withRateLimiter(RateLimiter rateLimiter) {
+            assert rateLimiter != null;
             this.rateLimiter = rateLimiter;
             return this;
         }
@@ -173,6 +182,7 @@ public class Futurefit {
          * @see RateLimiter#create(double, Duration)
          */
         public Builder withRateLimiter(double permitsPerSecond, Duration warmupPeriod) {
+            assert warmupPeriod != null;
             this.rateLimiter = RateLimiter.create(permitsPerSecond, warmupPeriod);
             return this;
         }
@@ -181,6 +191,7 @@ public class Futurefit {
          * @see RateLimiter#create(double, long, TimeUnit)
          */
         public Builder withRateLimiter(double permitsPerSecond, long warmupPeriod, TimeUnit unit) {
+            assert unit != null;
             this.rateLimiter = RateLimiter.create(permitsPerSecond, warmupPeriod, unit);
             return this;
         }
@@ -209,14 +220,16 @@ public class Futurefit {
             clientBuilder.cookieJar(cookieJar);
 
             this.retrofitBuilder.client(clientBuilder.build());
-            return new Futurefit(this.retrofitBuilder, requestUpdateInterceptor, cacheManager, rateLimiter,
+            return new Futurefit(this.retrofitBuilder, requestUpdateInterceptor, cacheManager, rateLimiter, baseUrl,
                     interceptors);
         }
 
     }
 
     private Futurefit(retrofit2.Retrofit.Builder retrofitBuilder, RequestUpdateInterceptor requestUpdateInterceptor,
-            CacheManager cacheManager, RateLimiter rateLimiter, List<RequestInterceptor> interceptors2) {
+            CacheManager cacheManager, RateLimiter rateLimiter, String baseUrl,
+            List<RequestInterceptor> interceptors2) {
+        this.baseUrl = baseUrl;
         this.retrofitBuilder = retrofitBuilder;
         this.requestUpdateInterceptor = requestUpdateInterceptor;
         this.cacheManager = cacheManager;
@@ -243,7 +256,7 @@ public class Futurefit {
     private <T> T createInterceptorProxy(Class<T> targetInterface, T delegate, RequestFacadeCallback callback) {
         return (T) Proxy.newProxyInstance(targetInterface.getClassLoader(), new Class<?>[] { targetInterface },
                 new InterceptorProxyInvocationHandler<T>(delegate, callback, this.cacheManager, this.rateLimiter,
-                        this.interceptors));
+                        this.baseUrl, this.interceptors));
     }
 
     public static class RequestUpdateInterceptor implements Interceptor {

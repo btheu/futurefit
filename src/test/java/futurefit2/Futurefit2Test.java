@@ -16,6 +16,7 @@ import futurefit2.core.RequestFacade;
 import futurefit2.core.interceptor.HttpLoggingInterceptor.Level;
 import futurefit2.core.interceptor.MethodInterceptor;
 import futurefit2.core.interceptor.RequestInterceptor;
+import futurefit2.utils.FuturefitException;
 import junit.framework.TestCase;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,7 @@ import retrofit2.http.Query;
 @FixMethodOrder
 public class Futurefit2Test {
 
-    @Test(expected = InterceptorException.class)
+    @Test(expected = FuturefitException.class)
     public void testInterceptor() {
         Futurefit build = new Futurefit.Builder()//
                 .log(Level.BASIC)//

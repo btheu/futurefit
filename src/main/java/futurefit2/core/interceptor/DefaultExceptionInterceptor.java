@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 
 import futurefit2.core.interceptor.DefaultExceptionInterceptor.FuturefitUrl.FuturefitUrlBuilder;
 import futurefit2.utils.FuturefitException;
-import lombok.Builder;
 import lombok.Singular;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.HttpUrl;
@@ -187,7 +186,7 @@ public class DefaultExceptionInterceptor implements RequestInterceptor {
 
     }
 
-    @Builder
+    @lombok.Builder
     public static class FuturefitUrl {
         String method;
         String path;

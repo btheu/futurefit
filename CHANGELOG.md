@@ -1,6 +1,7 @@
 
 ## 0.3.1-SNAPSHOT - pending
 
+*	fix: NPE when post body is empty
 *	build: update dependencies
 *	add RequestInterceptor to FutureFit builder
 *	add DefaultExceptionInterceptor with compiled Url

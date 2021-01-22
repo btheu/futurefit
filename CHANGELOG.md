@@ -1,5 +1,12 @@
 
-## 0.3.1-SNAPSHOT - pending
+## 0.3.2-SNAPSHOT - pending
+
+## 0.3.1 - 2021-01-22
+
+*	fix: NPE on logger when post body is empty
+*	build: update dependencies
+*	add RequestInterceptor to FutureFit builder
+*	add DefaultExceptionInterceptor with compiled Url
 
 ## 0.3.0 - 2020-05-17
 

@@ -64,7 +64,7 @@ public class HttpLoggingInterceptor implements Interceptor {
 
             String bodySize = "no";
             RequestBody body = request.body();
-            if (body != null) {
+            if (body != null && body.contentLength() > 0) {
                 String bodyMime = body.contentType().type();
                 if (bodyMime != null) {
                     log.log("Content-Type: " + bodyMime);

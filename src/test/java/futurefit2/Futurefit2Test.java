@@ -15,6 +15,8 @@ import estivate.annotations.Text;
 import futurefit2.core.RequestFacade;
 import futurefit2.core.interceptor.HttpLoggingInterceptor.Level;
 import futurefit2.core.interceptor.MethodInterceptor;
+import futurefit2.core.interceptor.RequestInterceptor;
+import futurefit2.utils.FuturefitException;
 import junit.framework.TestCase;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +24,7 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
@@ -32,6 +35,39 @@ import retrofit2.http.Query;
 @Slf4j
 @FixMethodOrder
 public class Futurefit2Test {
+
+    @Test(expected = FuturefitException.class)
+    public void testInterceptor() {
+        Futurefit build = new Futurefit.Builder()//
+                .log(Level.BASIC)//
+                .baseUrl("https://www.google.fr")//
+                .addInterceptor(new TestInterceptor()) //
+                .build();
+
+        GoogleApi create = build.create(GoogleApi.class);
+
+        create.failingCall("search");
+    }
+
+    public class TestInterceptor implements RequestInterceptor {
+
+        @Override
+        public Object intercept(RequestInvocation invocation) {
+
+            Object invoke = invocation.invoke();
+
+            String name = invocation.method().getName();
+
+            String url = invocation.method().getAnnotation(GET.class).value();
+
+            String value = ((Path) invocation.method().getParameterAnnotations()[0][0]).value();
+
+            String value2 = invocation.arguments()[0].toString();
+
+            throw new InterceptorException(name + " (" + url + ")@" + value + "=" + value2);
+        }
+
+    }
 
     @Test
     public void testRateLimiter() throws IOException, InterruptedException {
@@ -160,6 +196,10 @@ public class Futurefit2Test {
         @Headers({ "User-Agent:Mozilla/5.0 Firefox/68.0" })
         public ResponseBody searchResponse(@Query("q") String query);
 
+        @Estivate
+        @GET("/artp/{path}?hl=en&safe=off")
+        @Headers({ "User-Agent:Mozilla/5.0 Firefox/68.0" })
+        public Page failingCall(@Path("path") String path);
     }
 
     @Data
@@ -170,4 +210,10 @@ public class Futurefit2Test {
         public String resultStatistics;
     }
 
+    @SuppressWarnings("serial")
+    public class InterceptorException extends RuntimeException {
+        public InterceptorException(String message) {
+            super(message);
+        }
+    }
 }

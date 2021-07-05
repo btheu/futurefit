@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.concurrent.TimeUnit;
 
-import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.PersistentCacheManager;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
@@ -150,9 +149,9 @@ public class Futurefit2Test {
 
         String stats = create.searchCached("estivate").getResultStatistics();
 
-        this.assertNotEmpty(stats);
-
         log.info("Statistics [{}]", stats);
+
+        this.assertNotEmpty(stats);
     }
 
     @Test

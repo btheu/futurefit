@@ -11,7 +11,9 @@ import org.ehcache.CacheManager;
 import futurefit2.Cacheable;
 import futurefit2.utils.ReflectionUtil;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class DefaultCacheableInterceptor implements RequestInterceptor {
 
     private CacheManager cacheManager;
@@ -31,7 +33,8 @@ public class DefaultCacheableInterceptor implements RequestInterceptor {
 
         Cacheable findAnnotation = ReflectionUtil.findAnnotation(Cacheable.class, method.getAnnotations());
         if (findAnnotation != null) {
-            Cache<Object, Object> cache = cacheManager.getCache(findAnnotation.cache(), Object.class, Object.class);
+            String cacheName = findAnnotation.cache();
+            Cache<Object, Object> cache = cacheManager.getCache(cacheName, Object.class, Object.class);
 
             Key key = new Key(method, args);
 
@@ -44,6 +47,11 @@ public class DefaultCacheableInterceptor implements RequestInterceptor {
                 }
 
                 cache.put(key, result);
+
+                if (!cache.containsKey(key)) {
+                    log.error("something wrong happen with cache '{}' on method '{}'", //
+                            cacheName, method.toGenericString());
+                }
 
             }
             return result;

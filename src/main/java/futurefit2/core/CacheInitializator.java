@@ -6,6 +6,7 @@ import java.time.Duration;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.Status;
+import org.ehcache.config.CacheRuntimeConfiguration;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.ExpiryPolicyBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
@@ -24,14 +25,18 @@ public class CacheInitializator {
         for (Method method : apiClass.getDeclaredMethods()) {
             Cacheable findAnnotation = ReflectionUtil.findAnnotation(Cacheable.class, method.getAnnotations());
             if (findAnnotation != null) {
-                Cache<Object, Object> cache = cacheManager.getCache(findAnnotation.cache(), Object.class, Object.class);
+                String cacheName = findAnnotation.cache();
+                Cache<Object, Object> cache = cacheManager.getCache(cacheName, Object.class, Object.class);
                 if (cache == null) {
-                    cacheManager.createCache(findAnnotation.cache(), //
-                            CacheConfigurationBuilder
-                                    .newCacheConfigurationBuilder(Object.class, Object.class,
-                                            ResourcePoolsBuilder.heap(findAnnotation.heap()))
-                                    .withExpiry(ExpiryPolicyBuilder
-                                            .timeToLiveExpiration(Duration.parse(findAnnotation.duration()))));
+                    cacheManager.createCache(cacheName, //
+                            CacheConfigurationBuilder.newCacheConfigurationBuilder(Object.class, Object.class, ResourcePoolsBuilder.heap(findAnnotation.heap()))
+                                    .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.parse(findAnnotation.duration()))));
+                } else {
+                    CacheRuntimeConfiguration<Object, Object> cacheConfiguration = cache.getRuntimeConfiguration();
+
+                    cacheManager.removeCache(cacheName);
+                    cacheManager.createCache(cacheName, cacheConfiguration.derive() //
+                            .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.parse(findAnnotation.duration()))));
                 }
             }
         }

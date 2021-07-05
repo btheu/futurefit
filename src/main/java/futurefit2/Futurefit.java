@@ -219,6 +219,13 @@ public class Futurefit {
             }
             clientBuilder.cookieJar(cookieJar);
 
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+                    cacheManager.close();
+                }
+            });
+
             this.retrofitBuilder.client(clientBuilder.build());
             return new Futurefit(this.retrofitBuilder, requestUpdateInterceptor, cacheManager, rateLimiter, baseUrl,
                     interceptors);

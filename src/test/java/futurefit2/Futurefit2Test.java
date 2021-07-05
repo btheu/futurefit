@@ -1,11 +1,19 @@
 package futurefit2;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.concurrent.TimeUnit;
 
+import org.ehcache.Cache;
 import org.ehcache.CacheManager;
+import org.ehcache.PersistentCacheManager;
+import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.CacheManagerBuilder;
+import org.ehcache.config.builders.ResourcePoolsBuilder;
+import org.ehcache.config.units.EntryUnit;
+import org.ehcache.config.units.MemoryUnit;
+import org.ehcache.impl.serialization.PlainJavaSerializer;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -19,6 +27,7 @@ import futurefit2.core.interceptor.RequestInterceptor;
 import futurefit2.utils.FuturefitException;
 import junit.framework.TestCase;
 import lombok.Data;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -88,7 +97,44 @@ public class Futurefit2Test {
     }
 
     @Test
-    public void testCache() throws IOException, InterruptedException {
+    @SneakyThrows
+    public void testCacheOnDisk() {
+        ResourcePoolsBuilder diskResourcePools = ResourcePoolsBuilder.newResourcePoolsBuilder()//
+                .heap(1, EntryUnit.ENTRIES)//
+                .offheap(1, MemoryUnit.MB) //
+                .disk(2, MemoryUnit.MB, true);
+
+        CacheConfigurationBuilder<Object, Object> newCacheConfigurationBuilder = //
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Object.class, Object.class, diskResourcePools) //
+                        .withKeySerializer(new PlainJavaSerializer<Object>(Futurefit.class.getClassLoader())) //
+                        .withValueSerializer(new PlainJavaSerializer<Object>(Futurefit.class.getClassLoader())); //
+
+        CacheManagerBuilder<PersistentCacheManager> cacheManagerBuilder = CacheManagerBuilder.newCacheManagerBuilder()//
+                .with(CacheManagerBuilder.persistence("target/t3")) //
+                .withCache("google", newCacheConfigurationBuilder); //
+
+        final PersistentCacheManager cacheManager = cacheManagerBuilder.build(true);
+
+        Futurefit build = new Futurefit.Builder().log(Level.BASIC).baseUrl("https://www.google.fr")//
+                .cacheManager(cacheManager).build();
+
+        GoogleApi create = build.create(GoogleApi.class);
+
+        for (int i = 0; i < 10; i++) {
+            create.searchCached("estivate");
+            Thread.sleep(1 * 1000);
+        }
+
+        String stats = create.searchCached("estivate").getResultStatistics();
+
+        this.assertNotEmpty(stats);
+
+        log.info("Statistics [{}]", stats);
+    }
+
+    @Test
+    @SneakyThrows
+    public void testCacheOnMemory() {
 
         CacheManager cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build();
 
@@ -203,7 +249,7 @@ public class Futurefit2Test {
     }
 
     @Data
-    public static class Page {
+    public static class Page implements Serializable {
         // get the div holding statistics
         @Select("#result-stats")
         @Text

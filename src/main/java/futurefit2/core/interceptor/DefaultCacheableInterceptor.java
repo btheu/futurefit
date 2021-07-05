@@ -1,13 +1,15 @@
 package futurefit2.core.interceptor;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 
 import futurefit2.Cacheable;
 import futurefit2.utils.ReflectionUtil;
-import lombok.Builder;
 import lombok.Data;
 
 public class DefaultCacheableInterceptor implements RequestInterceptor {
@@ -31,7 +33,7 @@ public class DefaultCacheableInterceptor implements RequestInterceptor {
         if (findAnnotation != null) {
             Cache<Object, Object> cache = cacheManager.getCache(findAnnotation.cache(), Object.class, Object.class);
 
-            Key key = Key.builder().method(method).args(args).build();
+            Key key = new Key(method, args);
 
             Object result = cache.get(key);
             if (result == null) {
@@ -48,14 +50,33 @@ public class DefaultCacheableInterceptor implements RequestInterceptor {
         }
 
         return invocation.invoke();
-
     }
 
     @Data
-    @Builder
-    public static class Key {
-        Method   method;
-        Object[] args;
+    @SuppressWarnings("serial")
+    public static class Key implements Serializable {
+        private final List<Object> signature = new ArrayList<>();
+
+        public Key(Method method, Object[] args) {
+            signature.add(method.getName());
+            signature.add("%FUTUREFIT_SEP%");
+            signature.add(method.getReturnType().getName());
+            signature.add("%FUTUREFIT_SEP%");
+            for (Class<?> paramType : method.getParameterTypes()) {
+                signature.add(paramType.getName());
+            }
+            signature.add("%FUTUREFIT_SEP%");
+            for (Object arg : args) {
+                signature.add(arg);
+            }
+        }
+
+        public Key(Object[] args) {
+            for (Object arg : args) {
+                signature.add(arg);
+            }
+        }
+
     }
 
 }

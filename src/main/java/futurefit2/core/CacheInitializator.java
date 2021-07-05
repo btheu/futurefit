@@ -32,11 +32,13 @@ public class CacheInitializator {
                             CacheConfigurationBuilder.newCacheConfigurationBuilder(Object.class, Object.class, ResourcePoolsBuilder.heap(findAnnotation.heap()))
                                     .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.parse(findAnnotation.duration()))));
                 } else {
-                    CacheRuntimeConfiguration<Object, Object> cacheConfiguration = cache.getRuntimeConfiguration();
-
+                    // override TTL
                     cacheManager.removeCache(cacheName);
-                    cacheManager.createCache(cacheName, cacheConfiguration.derive() //
-                            .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.parse(findAnnotation.duration()))));
+                    cacheManager.createCache(cacheName, //
+                            CacheConfigurationBuilder//
+                                    .newCacheConfigurationBuilder(cache.getRuntimeConfiguration())
+                                    .withExpiry(ExpiryPolicyBuilder
+                                            .timeToLiveExpiration(Duration.parse(findAnnotation.duration()))));
                 }
             }
         }

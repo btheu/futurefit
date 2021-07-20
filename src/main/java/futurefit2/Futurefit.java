@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.ehcache.CacheManager;
+import org.ehcache.Status;
 import org.ehcache.config.builders.CacheManagerBuilder;
 
 import com.google.common.util.concurrent.RateLimiter;
@@ -54,7 +55,7 @@ public class Futurefit {
     private final RequestUpdateInterceptor requestUpdateInterceptor;
 
     private final CacheManager cacheManager;
-    private final RateLimiter  rateLimiter;
+    private final RateLimiter rateLimiter;
 
     private final List<RequestInterceptor> interceptors;
 
@@ -86,13 +87,13 @@ public class Futurefit {
         protected final Retrofit.Builder retrofitBuilder = new Retrofit.Builder();
 
         protected final RequestUpdateInterceptor requestUpdateInterceptor = new RequestUpdateInterceptor();
-        protected final HttpLoggingInterceptor   loggingInterceptor       = new HttpLoggingInterceptor();
+        protected final HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
 
-        protected CookieJar    cookieJar    = null;
+        protected CookieJar cookieJar = null;
         protected CacheManager cacheManager = null;
-        protected RateLimiter  rateLimiter  = null;
+        protected RateLimiter rateLimiter = null;
 
-        protected String baseUrl   = null;
+        protected String baseUrl = null;
         protected String userAgent = null;
 
         protected List<RequestInterceptor> interceptors = new ArrayList<>();
@@ -222,7 +223,11 @@ public class Futurefit {
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 @Override
                 public void run() {
-                    cacheManager.close();
+                    synchronized (cacheManager) {
+                        if (cacheManager.getStatus() == Status.AVAILABLE) {
+                            cacheManager.close();
+                        }
+                    }
                 }
             });
 

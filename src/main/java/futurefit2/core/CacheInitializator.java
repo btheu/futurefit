@@ -6,7 +6,6 @@ import java.time.Duration;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.Status;
-import org.ehcache.config.CacheRuntimeConfiguration;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.ExpiryPolicyBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
@@ -18,7 +17,7 @@ public class CacheInitializator {
 
     public static void init(Class<?> apiClass, CacheManager cacheManager) {
 
-        if (cacheManager.getStatus() != Status.AVAILABLE) {
+         if (cacheManager.getStatus() == Status.UNINITIALIZED) {
             cacheManager.init();
         }
 

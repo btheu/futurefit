@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import org.ehcache.CacheManager;
 import org.ehcache.Status;
@@ -20,6 +21,7 @@ import com.google.common.util.concurrent.RateLimiter;
 
 import futurefit2.convertor.BuiltInConverterFactory;
 import futurefit2.core.CacheInitializator;
+import futurefit2.core.CacheInitializator2.CacheDefinitions;
 import futurefit2.core.ProxyRequestFacade;
 import futurefit2.core.RequestFacadeCallback;
 import futurefit2.core.UnboxCallAdapter;
@@ -157,6 +159,11 @@ public class Futurefit {
             assert cacheManager != null;
             this.cacheManager = cacheManager;
             return this;
+        }
+
+        public Builder cacheManagerProvider(Function<CacheDefinitions, org.springframework.cache.CacheManager> provider) {
+            // TODO Auto-generated method stub
+            return null;
         }
 
         public Builder addInterceptor(RequestInterceptor interceptor) {

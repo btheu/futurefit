@@ -17,4 +17,6 @@ public interface CacheManager {
 
     <K, V> Cache<K, V> getCache(String cacheName, Class<K> keyType, Class<V> valueType);
 
+    void close();
+
 }

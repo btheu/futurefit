@@ -19,10 +19,9 @@ public class SpringCacheTest {
     @Test
     public void testSpringCaffeineCacheMemoryConfiguration() {
 
-        Futurefit build = new Futurefit.Builder()
-                .log(Level.BASIC)
+        Futurefit build = new Futurefit.Builder().log(Level.BASIC)
                 .baseUrl("https://www.google.fr")//
-                .cacheManagerProvider(e -> {
+                .cacheManagerProviderSpring(definition -> {
                     Caffeine<Object, Object> caffeine = Caffeine.newBuilder().expireAfterWrite(5, TimeUnit.SECONDS);
 
                     CaffeineCacheManager cacheManager = new CaffeineCacheManager();

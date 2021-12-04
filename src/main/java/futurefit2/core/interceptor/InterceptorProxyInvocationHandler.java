@@ -6,11 +6,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.ehcache.CacheManager;
-
 import com.google.common.util.concurrent.RateLimiter;
 
 import futurefit2.core.RequestFacadeCallback;
+import futurefit2.core.cache.CacheManager;
 import futurefit2.core.interceptor.RequestInterceptor.RequestInvocation;
 
 /**
@@ -57,9 +56,9 @@ public class InterceptorProxyInvocationHandler<T> implements InvocationHandler {
 
         private boolean executed = false;
 
-        private String   baseUrl;
-        private Object   target;
-        private Method   method;
+        private String baseUrl;
+        private Object target;
+        private Method method;
         private Object[] args;
 
         public DefaultRequestInvocation(Object target, Method method, Object[] args, RequestFacadeCallback callback,

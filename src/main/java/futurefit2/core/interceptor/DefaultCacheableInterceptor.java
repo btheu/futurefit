@@ -5,10 +5,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ehcache.Cache;
-import org.ehcache.CacheManager;
-
 import futurefit2.Cacheable;
+import futurefit2.core.cache.CacheManager;
+import futurefit2.core.cache.CacheManager.Cache;
 import futurefit2.utils.ReflectionUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +47,7 @@ public class DefaultCacheableInterceptor implements RequestInterceptor {
 
                 cache.put(key, result);
 
-                if (!cache.containsKey(key)) {
+                if (cache.hasNoKey(key)) {
                     log.error("something wrong happen with cache '{}' on method '{}'", //
                             cacheName, method.toGenericString());
                 }

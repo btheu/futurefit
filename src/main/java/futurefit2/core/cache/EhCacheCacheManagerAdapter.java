@@ -2,20 +2,23 @@ package futurefit2.core.cache;
 
 import org.ehcache.Status;
 
+import lombok.NonNull;
+
 public class EhCacheCacheManagerAdapter implements CacheManager {
 
     private org.ehcache.CacheManager cacheManager;
 
-    public EhCacheCacheManagerAdapter(org.ehcache.CacheManager cacheManager) {
+    public EhCacheCacheManagerAdapter(@NonNull org.ehcache.CacheManager cacheManager) {
         this.cacheManager = cacheManager;
     }
 
     @Override
-    public <K, V> Cache<K, V> getCache(String cacheName, Class<K> keyType, Class<V> valueType) {
-        return wrap2(cacheManager.getCache(cacheName, keyType, valueType));
+    public <K, V> Cache<K, V> getCache(@NonNull String cacheName, @NonNull Class<K> keyType,
+            @NonNull Class<V> valueType) {
+        return wrap(cacheManager.getCache(cacheName, keyType, valueType));
     }
 
-    private <K, V> Cache<K, V> wrap2(org.ehcache.Cache<K, V> cache) {
+    private <K, V> Cache<K, V> wrap(@NonNull org.ehcache.Cache<K, V> cache) {
         return new Cache<K, V>() {
             @Override
             public V get(K key) {

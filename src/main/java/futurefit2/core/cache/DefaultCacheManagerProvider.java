@@ -10,7 +10,9 @@ import org.ehcache.config.units.EntryUnit;
 import org.ehcache.config.units.MemoryUnit;
 
 import futurefit2.core.cache.CacheManagerInitializator.CacheDefinitions;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class DefaultCacheManagerProvider implements Function<CacheDefinitions, CacheManager> {
 
     @Override
@@ -18,6 +20,8 @@ public class DefaultCacheManagerProvider implements Function<CacheDefinitions, C
         CacheManagerBuilder<org.ehcache.CacheManager> builder = CacheManagerBuilder.newCacheManagerBuilder();
 
         t.getDefinitions().forEach(d -> {
+            log.debug("creating cache name={}", d.getName());
+
             ResourcePoolsBuilder rpb = ResourcePoolsBuilder.newResourcePoolsBuilder();
             rpb = rpb.offheap(10, MemoryUnit.MB);
             if (d.getHeapSize() == null) {

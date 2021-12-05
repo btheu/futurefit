@@ -23,7 +23,7 @@ public class EhCacheCacheManagerProvider implements Function<CacheDefinitions, C
         if (cacheManager == null) {
             return new EhCacheCacheManagerAdapter(this.provider.apply(t));
         } else {
-            cacheManager.init();
+            EhCacheInitializator.init(t.getApiClass(), cacheManager);
             return new EhCacheCacheManagerAdapter(cacheManager);
         }
     }

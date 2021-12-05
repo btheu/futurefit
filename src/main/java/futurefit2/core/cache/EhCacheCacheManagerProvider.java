@@ -20,10 +20,11 @@ public class EhCacheCacheManagerProvider implements Function<CacheDefinitions, C
 
     @Override
     public CacheManager apply(@NonNull CacheDefinitions t) {
-        if (cacheManager != null) {
-            return new EhCacheCacheManagerAdapter(cacheManager);
-        } else {
+        if (cacheManager == null) {
             return new EhCacheCacheManagerAdapter(this.provider.apply(t));
+        } else {
+            cacheManager.init();
+            return new EhCacheCacheManagerAdapter(cacheManager);
         }
     }
 

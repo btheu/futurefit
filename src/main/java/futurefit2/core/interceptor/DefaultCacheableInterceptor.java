@@ -37,8 +37,10 @@ public class DefaultCacheableInterceptor implements RequestInterceptor {
 
             Key key = new Key(method, args);
 
-            Object result = cache.get(key);
-            if (result == null) {
+            Object result;
+            if (cache.hasKey(key)) {
+                result = cache.get(key);
+            } else {
                 result = invocation.invoke();
 
                 if (result == null) {

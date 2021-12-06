@@ -5,11 +5,11 @@ import static org.junit.Assert.assertNotNull;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
-import org.springframework.cache.Cache;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 
+import futurefit2.Futurefit2Test.GoogleApi;
 import futurefit2.core.interceptor.HttpLoggingInterceptor.Level;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,17 +19,36 @@ public class SpringCacheTest {
     @Test
     public void testSpringCaffeineCacheMemoryConfiguration() {
 
-        Futurefit build = new Futurefit.Builder().log(Level.BASIC)
+        final Futurefit build = new Futurefit.Builder().log(Level.BASIC)
                 .baseUrl("https://www.google.fr")//
-                .cacheManagerProviderSpring(definition -> {
-                    Caffeine<Object, Object> caffeine = Caffeine.newBuilder().expireAfterWrite(5, TimeUnit.SECONDS);
-
+                .cacheManagerProviderSpring(definitions -> {
+                    log.info("> Building own caffeine cache manager");
                     CaffeineCacheManager cacheManager = new CaffeineCacheManager();
-                    cacheManager.setCaffeine(caffeine);
 
+                    definitions.getDefinitions().forEach(d -> {
+
+                        com.github.benmanes.caffeine.cache.Cache<Object, Object> cache = Caffeine.newBuilder()
+                                .expireAfterWrite(d.getTimeToLive().getSeconds(), TimeUnit.SECONDS)
+                                .maximumSize(d.getHeapSize())
+                                .build();
+
+                        cacheManager.registerCustomCache(d.getName(), cache);
+
+                    });
+                    log.info("< Building own caffeine cache manager");
                     return cacheManager;
                 })
                 .build();
+
+        final GoogleApi create = build.create(GoogleApi.class);
+
+        for (int i = 0; i < 4; i++) {
+            final String stats = create.searchCached("estivate").getResultStatistics();
+
+            Futurefit2Test.assertNotEmpty(stats);
+
+            log.info("Statistics [{}]", stats);
+        }
 
     }
 
@@ -40,7 +59,7 @@ public class SpringCacheTest {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager();
         cacheManager.setCaffeine(caffeine);
 
-        Cache cache = cacheManager.getCache("sample");
+        org.springframework.cache.Cache cache = cacheManager.getCache("sample");
 
         cache.put("key1", 42);
 

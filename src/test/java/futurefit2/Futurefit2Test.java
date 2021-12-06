@@ -199,7 +199,7 @@ public class Futurefit2Test {
         log.info("Statistics [{}]", response);
     }
 
-    private void assertNotEmpty(String sentence) {
+    public static void assertNotEmpty(String sentence) {
         TestCase.assertNotNull(sentence);
         Assert.assertNotEquals("", sentence.trim());
     }

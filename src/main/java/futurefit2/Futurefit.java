@@ -11,23 +11,26 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import org.ehcache.CacheManager;
-import org.ehcache.Status;
-import org.ehcache.config.builders.CacheManagerBuilder;
+import java.util.function.Function;
 
 import com.google.common.util.concurrent.RateLimiter;
 
 import futurefit2.convertor.BuiltInConverterFactory;
-import futurefit2.core.CacheInitializator;
 import futurefit2.core.ProxyRequestFacade;
 import futurefit2.core.RequestFacadeCallback;
 import futurefit2.core.UnboxCallAdapter;
+import futurefit2.core.cache.CacheManager;
+import futurefit2.core.cache.CacheManagerInitializator;
+import futurefit2.core.cache.CacheManagerInitializator.CacheDefinitions;
+import futurefit2.core.cache.DefaultCacheManagerProvider;
+import futurefit2.core.cache.EhCacheCacheManagerProvider;
+import futurefit2.core.cache.SpringCacheManagerProvider;
 import futurefit2.core.interceptor.HttpLoggingInterceptor;
 import futurefit2.core.interceptor.HttpLoggingInterceptor.Level;
 import futurefit2.core.interceptor.InterceptorProxyInvocationHandler;
 import futurefit2.core.interceptor.RequestInterceptor;
 import futurefit2.core.interceptor.UserAgentInterceptor;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
@@ -54,11 +57,12 @@ public class Futurefit {
 
     private final RequestUpdateInterceptor requestUpdateInterceptor;
 
-    private final CacheManager cacheManager;
     private final RateLimiter rateLimiter;
 
     private final List<RequestInterceptor> interceptors;
 
+    private final Function<CacheDefinitions, CacheManager> cacheProvider;
+    
     private static CallAdapter.Factory callAdapterFactory = new CallAdapter.Factory() {
         @Override
         public CallAdapter<?, ?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
@@ -90,8 +94,9 @@ public class Futurefit {
         protected final HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
 
         protected CookieJar cookieJar = null;
-        protected CacheManager cacheManager = null;
         protected RateLimiter rateLimiter = null;
+
+        protected Function<CacheDefinitions, futurefit2.core.cache.CacheManager> cacheProvider;
 
         protected String baseUrl = null;
         protected String userAgent = null;
@@ -108,65 +113,71 @@ public class Futurefit {
             return retrofitBuilder;
         }
 
-        public Builder client(OkHttpClient client) {
-            assert client != null;
+        public Builder client(@NonNull OkHttpClient client) {
             clientBuilder = client.newBuilder();
             return this;
         }
 
-        public Builder baseUrl(String baseUrl) {
-            assert baseUrl != null;
+        public Builder baseUrl(@NonNull String baseUrl) {
             this.baseUrl = baseUrl;
             this.retrofitBuilder.baseUrl(baseUrl);
             return this;
         }
 
-        public Builder baseUrl(URL baseUrl) {
-            assert baseUrl != null;
+        public Builder baseUrl(@NonNull URL baseUrl) {
             this.baseUrl = baseUrl.toString();
             this.retrofitBuilder.baseUrl(baseUrl);
             return this;
         }
 
-        public Builder baseUrl(HttpUrl baseUrl) {
-            assert baseUrl != null;
+        public Builder baseUrl(@NonNull HttpUrl baseUrl) {
             this.baseUrl = baseUrl.toString();
             this.retrofitBuilder.baseUrl(baseUrl);
             return this;
         }
 
-        public Builder log(Level level) {
-            assert level != null;
+        public Builder log(@NonNull Level level) {
             loggingInterceptor.setLevel(level);
             return this;
         }
 
-        public Builder userAgent(String userAgent) {
-            assert userAgent != null;
+        public Builder userAgent(@NonNull String userAgent) {
             this.userAgent = userAgent;
             return this;
         }
 
-        public Builder cookieJar(CookieJar cookieJar) {
-            assert cookieJar != null;
+        public Builder cookieJar(@NonNull CookieJar cookieJar) {
             this.cookieJar = cookieJar;
             return this;
         }
 
-        public Builder cacheManager(CacheManager cacheManager) {
-            assert cacheManager != null;
-            this.cacheManager = cacheManager;
+        /**
+         * @deprecated use cacheManagerProviderEhCache()
+         */
+        @Deprecated
+        public Builder cacheManager(@NonNull org.ehcache.CacheManager cacheManager) {
+            this.cacheProvider = new EhCacheCacheManagerProvider(cacheManager);
             return this;
         }
 
-        public Builder addInterceptor(RequestInterceptor interceptor) {
-            assert interceptor != null;
+        public Builder cacheManagerProviderEhCache(
+                @NonNull Function<CacheDefinitions, org.ehcache.CacheManager> provider) {
+            this.cacheProvider = new EhCacheCacheManagerProvider(provider);
+            return this;
+        }
+
+        public Builder cacheManagerProviderSpring(
+                @NonNull Function<CacheDefinitions, org.springframework.cache.CacheManager> provider) {
+            this.cacheProvider = new SpringCacheManagerProvider(provider);
+            return this;
+        }
+
+        public Builder addInterceptor(@NonNull RequestInterceptor interceptor) {
             this.interceptors.add(interceptor);
             return this;
         }
 
-        public Builder withRateLimiter(RateLimiter rateLimiter) {
-            assert rateLimiter != null;
+        public Builder withRateLimiter(@NonNull RateLimiter rateLimiter) {
             this.rateLimiter = rateLimiter;
             return this;
         }
@@ -182,8 +193,7 @@ public class Futurefit {
         /**
          * @see RateLimiter#create(double, Duration)
          */
-        public Builder withRateLimiter(double permitsPerSecond, Duration warmupPeriod) {
-            assert warmupPeriod != null;
+        public Builder withRateLimiter(double permitsPerSecond, @NonNull Duration warmupPeriod) {
             this.rateLimiter = RateLimiter.create(permitsPerSecond, warmupPeriod);
             return this;
         }
@@ -191,8 +201,7 @@ public class Futurefit {
         /**
          * @see RateLimiter#create(double, long, TimeUnit)
          */
-        public Builder withRateLimiter(double permitsPerSecond, long warmupPeriod, TimeUnit unit) {
-            assert unit != null;
+        public Builder withRateLimiter(double permitsPerSecond, long warmupPeriod, @NonNull TimeUnit unit) {
             this.rateLimiter = RateLimiter.create(permitsPerSecond, warmupPeriod, unit);
             return this;
         }
@@ -206,8 +215,8 @@ public class Futurefit {
                     .addNetworkInterceptor(requestUpdateInterceptor) //
                     .addNetworkInterceptor(loggingInterceptor);
 
-            if (cacheManager == null) {
-                cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build();
+            if (cacheProvider == null) {
+                cacheProvider = new DefaultCacheManagerProvider();
             }
             if (rateLimiter == null) {
                 rateLimiter = RateLimiter.create(10);
@@ -220,42 +229,32 @@ public class Futurefit {
             }
             clientBuilder.cookieJar(cookieJar);
 
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                @Override
-                public void run() {
-                    synchronized (cacheManager) {
-                        if (cacheManager.getStatus() == Status.AVAILABLE) {
-                            cacheManager.close();
-                        }
-                    }
-                }
-            });
-
             this.retrofitBuilder.client(clientBuilder.build());
-            return new Futurefit(this.retrofitBuilder, requestUpdateInterceptor, cacheManager, rateLimiter, baseUrl,
+            return new Futurefit(this.retrofitBuilder, requestUpdateInterceptor, cacheProvider, rateLimiter, baseUrl,
                     interceptors);
         }
 
     }
 
     private Futurefit(retrofit2.Retrofit.Builder retrofitBuilder, RequestUpdateInterceptor requestUpdateInterceptor,
-            CacheManager cacheManager, RateLimiter rateLimiter, String baseUrl,
-            List<RequestInterceptor> interceptors2) {
+            Function<CacheDefinitions, CacheManager> cacheProvider, RateLimiter rateLimiter, String baseUrl,
+            List<RequestInterceptor> interceptors) {
         this.baseUrl = baseUrl;
         this.retrofitBuilder = retrofitBuilder;
         this.requestUpdateInterceptor = requestUpdateInterceptor;
-        this.cacheManager = cacheManager;
         this.rateLimiter = rateLimiter;
-        this.interceptors = interceptors2;
+        this.interceptors = interceptors;
+        this.cacheProvider = cacheProvider;
     }
 
     public <T> T create(Class<T> apiClass) {
 
         T retrofitAdapter = this.retrofitBuilder.build().create(apiClass);
 
-        CacheInitializator.init(apiClass, cacheManager);
+        // init cache
+        CacheManager cacheManager = CacheManagerInitializator.init(apiClass, this.cacheProvider);
 
-        return createInterceptorProxy(apiClass, retrofitAdapter, new RequestFacadeCallback() {
+        return createInterceptorProxy(apiClass, retrofitAdapter, cacheManager, new RequestFacadeCallback() {
             @Override
             public void apply(ProxyRequestFacade requestFacade) {
                 requestUpdateInterceptor.setRequestUpdates(requestFacade);
@@ -265,9 +264,10 @@ public class Futurefit {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T createInterceptorProxy(Class<T> targetInterface, T delegate, RequestFacadeCallback callback) {
+    private <T> T createInterceptorProxy(Class<T> targetInterface, T delegate, CacheManager cacheManager,
+            RequestFacadeCallback callback) {
         return (T) Proxy.newProxyInstance(targetInterface.getClassLoader(), new Class<?>[] { targetInterface },
-                new InterceptorProxyInvocationHandler<T>(delegate, callback, this.cacheManager, this.rateLimiter,
+                new InterceptorProxyInvocationHandler<T>(delegate, callback, cacheManager, this.rateLimiter,
                         this.baseUrl, this.interceptors));
     }
 

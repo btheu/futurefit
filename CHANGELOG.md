@@ -6,6 +6,7 @@
 *	add spring framework cache manager support
 *   build: support jdk-16
 *	build: update dependencies
+*	test: update to junit5
 
 ## 0.3.1 - 2021-01-22
 

@@ -1,10 +1,12 @@
 package futurefit2;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -14,6 +16,7 @@ import futurefit2.core.interceptor.HttpLoggingInterceptor.Level;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@TestMethodOrder(MethodOrderer.DisplayName.class)
 public class SpringCacheTest {
 
     @Test

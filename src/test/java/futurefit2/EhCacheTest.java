@@ -1,6 +1,6 @@
 package futurefit2;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.function.Consumer;
 
@@ -15,7 +15,9 @@ import org.ehcache.config.units.EntryUnit;
 import org.ehcache.config.units.MemoryUnit;
 import org.ehcache.impl.serialization.CompactJavaSerializer;
 import org.ehcache.impl.serialization.PlainJavaSerializer;
-import org.junit.Test;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import futurefit2.Futurefit2Test.GoogleApi;
 import futurefit2.Futurefit2Test.Page;
@@ -24,6 +26,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@TestMethodOrder(MethodOrderer.DisplayName.class)
 public class EhCacheTest {
 
     @Test

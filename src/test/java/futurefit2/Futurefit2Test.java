@@ -1,5 +1,9 @@
 package futurefit2;
 
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -13,9 +17,9 @@ import org.ehcache.config.builders.ResourcePoolsBuilder;
 import org.ehcache.config.units.EntryUnit;
 import org.ehcache.config.units.MemoryUnit;
 import org.ehcache.impl.serialization.PlainJavaSerializer;
-import org.junit.Assert;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import estivate.annotations.Select;
 import estivate.annotations.Text;
@@ -24,7 +28,6 @@ import futurefit2.core.interceptor.HttpLoggingInterceptor.Level;
 import futurefit2.core.interceptor.MethodInterceptor;
 import futurefit2.core.interceptor.RequestInterceptor;
 import futurefit2.utils.FuturefitException;
-import junit.framework.TestCase;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -41,10 +44,10 @@ import retrofit2.http.Query;
  *
  */
 @Slf4j
-@FixMethodOrder
+@TestMethodOrder(MethodOrderer.DisplayName.class)
 public class Futurefit2Test {
 
-    @Test(expected = FuturefitException.class)
+    @Test
     public void testInterceptor() {
         Futurefit build = new Futurefit.Builder()//
                 .log(Level.BASIC)//
@@ -54,7 +57,9 @@ public class Futurefit2Test {
 
         GoogleApi create = build.create(GoogleApi.class);
 
-        create.failingCall("search");
+        assertThrows(FuturefitException.class, () -> {
+            create.failingCall("search");
+        });
     }
 
     public class TestInterceptor implements RequestInterceptor {
@@ -200,8 +205,8 @@ public class Futurefit2Test {
     }
 
     public static void assertNotEmpty(String sentence) {
-        TestCase.assertNotNull(sentence);
-        Assert.assertNotEquals("", sentence.trim());
+        assertNotNull(sentence);
+        assertNotEquals("", sentence.trim());
     }
 
     public static class GoogleInterceptor implements MethodInterceptor {

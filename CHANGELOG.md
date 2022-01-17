@@ -4,7 +4,7 @@
 *	add internal cache manager definition
 *	add cache manager provider interface
 *	add spring framework cache manager support
-*	build: support jdk-16
+*	build: support jdk-17
 *	build: update dependencies
 *	test: update to junit5
 

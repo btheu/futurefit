@@ -1,15 +1,18 @@
 package futurefit2.core.interceptor;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
-
-import org.ehcache.Cache;
-import org.ehcache.CacheManager;
+import java.util.ArrayList;
+import java.util.List;
 
 import futurefit2.Cacheable;
+import futurefit2.core.cache.CacheManager;
+import futurefit2.core.cache.CacheManager.Cache;
 import futurefit2.utils.ReflectionUtil;
-import lombok.Builder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class DefaultCacheableInterceptor implements RequestInterceptor {
 
     private CacheManager cacheManager;
@@ -29,12 +32,15 @@ public class DefaultCacheableInterceptor implements RequestInterceptor {
 
         Cacheable findAnnotation = ReflectionUtil.findAnnotation(Cacheable.class, method.getAnnotations());
         if (findAnnotation != null) {
-            Cache<Object, Object> cache = cacheManager.getCache(findAnnotation.cache(), Object.class, Object.class);
+            String cacheName = findAnnotation.cache();
+            Cache<Object, Object> cache = cacheManager.getCache(cacheName, Object.class, Object.class);
 
-            Key key = Key.builder().method(method).args(args).build();
+            Key key = new Key(method, args);
 
-            Object result = cache.get(key);
-            if (result == null) {
+            Object result;
+            if (cache.hasKey(key)) {
+                result = cache.get(key);
+            } else {
                 result = invocation.invoke();
 
                 if (result == null) {
@@ -43,19 +49,43 @@ public class DefaultCacheableInterceptor implements RequestInterceptor {
 
                 cache.put(key, result);
 
+                if (cache.hasNoKey(key)) {
+                    log.error("something wrong happen with cache '{}' on method '{}'", //
+                            cacheName, method.toGenericString());
+                }
+
             }
             return result;
         }
 
         return invocation.invoke();
-
     }
 
     @Data
-    @Builder
-    public static class Key {
-        Method   method;
-        Object[] args;
+    @SuppressWarnings("serial")
+    public static class Key implements Serializable {
+        private final List<Object> signature = new ArrayList<>();
+
+        public Key(Method method, Object[] args) {
+            signature.add(method.getName());
+            signature.add("%FUTUREFIT_SEP%");
+            signature.add(method.getReturnType().getName());
+            signature.add("%FUTUREFIT_SEP%");
+            for (Class<?> paramType : method.getParameterTypes()) {
+                signature.add(paramType.getName());
+            }
+            signature.add("%FUTUREFIT_SEP%");
+            for (Object arg : args) {
+                signature.add(arg);
+            }
+        }
+
+        public Key(Object[] args) {
+            for (Object arg : args) {
+                signature.add(arg);
+            }
+        }
+
     }
 
 }

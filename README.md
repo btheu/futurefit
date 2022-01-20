@@ -5,10 +5,10 @@ An extention of the great Retrofit with integration of <a href="https://github.c
 # Getting Started
 ```java
 
-	public static void main(String args[]) {
+    public static void main(String args[]) {
 	    Futurefit adapter = new Futurefit.Builder()
 	    	.baseUrl("https://www.google.com/")
-	      .build();
+	        .build();
 		
 	    GoogleApi create = adapter.create(GoogleApi.class);
 		
@@ -36,6 +36,6 @@ An extention of the great Retrofit with integration of <a href="https://github.c
 <dependency>
     <groupId>com.github.btheu.futurefit2</groupId>
     <artifactId>futurefit</artifactId>
-    <version>0.3.1</version>
+    <version>0.4.0</version>
 </dependency>
 ```

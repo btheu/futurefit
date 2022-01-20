@@ -16,6 +16,10 @@ import java.time.Duration;
 @Retention(RUNTIME)
 public @interface Cacheable {
 
+    /**
+     * 
+     * @return cache name to store entries
+     */
     String cache();
 
     /**
@@ -27,6 +31,11 @@ public @interface Cacheable {
      */
     String duration() default "PT1H";
 
-    int heap() default 100;
+    /**
+     * 
+     * @return Default heap size if new cache is not provided along the cache
+     *         manager
+     */
+    long heap() default 100;
 
 }

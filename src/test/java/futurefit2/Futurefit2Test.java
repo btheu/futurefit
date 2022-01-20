@@ -1,14 +1,25 @@
 package futurefit2;
 
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.concurrent.TimeUnit;
 
 import org.ehcache.CacheManager;
+import org.ehcache.PersistentCacheManager;
+import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.CacheManagerBuilder;
-import org.junit.Assert;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
+import org.ehcache.config.builders.ResourcePoolsBuilder;
+import org.ehcache.config.units.EntryUnit;
+import org.ehcache.config.units.MemoryUnit;
+import org.ehcache.impl.serialization.PlainJavaSerializer;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import estivate.annotations.Select;
 import estivate.annotations.Text;
@@ -17,8 +28,8 @@ import futurefit2.core.interceptor.HttpLoggingInterceptor.Level;
 import futurefit2.core.interceptor.MethodInterceptor;
 import futurefit2.core.interceptor.RequestInterceptor;
 import futurefit2.utils.FuturefitException;
-import junit.framework.TestCase;
 import lombok.Data;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -33,10 +44,10 @@ import retrofit2.http.Query;
  *
  */
 @Slf4j
-@FixMethodOrder
+@TestMethodOrder(MethodOrderer.DisplayName.class)
 public class Futurefit2Test {
 
-    @Test(expected = FuturefitException.class)
+    @Test
     public void testInterceptor() {
         Futurefit build = new Futurefit.Builder()//
                 .log(Level.BASIC)//
@@ -46,7 +57,9 @@ public class Futurefit2Test {
 
         GoogleApi create = build.create(GoogleApi.class);
 
-        create.failingCall("search");
+        assertThrows(FuturefitException.class, () -> {
+            create.failingCall("search");
+        });
     }
 
     public class TestInterceptor implements RequestInterceptor {
@@ -88,9 +101,23 @@ public class Futurefit2Test {
     }
 
     @Test
-    public void testCache() throws IOException, InterruptedException {
+    @SneakyThrows
+    public void testCacheOnDisk() {
+        ResourcePoolsBuilder diskResourcePools = ResourcePoolsBuilder.newResourcePoolsBuilder()//
+                .heap(1, EntryUnit.ENTRIES)//
+                .offheap(1, MemoryUnit.MB) //
+                .disk(2, MemoryUnit.MB, true);
 
-        CacheManager cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build();
+        CacheConfigurationBuilder<Object, Object> newCacheConfigurationBuilder = //
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Object.class, Object.class, diskResourcePools) //
+                        .withKeySerializer(new PlainJavaSerializer<Object>(Futurefit.class.getClassLoader())) //
+                        .withValueSerializer(new PlainJavaSerializer<Object>(Futurefit.class.getClassLoader())); //
+
+        CacheManagerBuilder<PersistentCacheManager> cacheManagerBuilder = CacheManagerBuilder.newCacheManagerBuilder()//
+                .with(CacheManagerBuilder.persistence("target/t3")) //
+                .withCache("google", newCacheConfigurationBuilder); //
+
+        final PersistentCacheManager cacheManager = cacheManagerBuilder.build(true);
 
         Futurefit build = new Futurefit.Builder().log(Level.BASIC).baseUrl("https://www.google.fr")//
                 .cacheManager(cacheManager).build();
@@ -107,6 +134,29 @@ public class Futurefit2Test {
         this.assertNotEmpty(stats);
 
         log.info("Statistics [{}]", stats);
+    }
+
+    @Test
+    @SneakyThrows
+    public void testCacheOnMemory() {
+
+        CacheManager cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build();
+
+        Futurefit build = new Futurefit.Builder().log(Level.BASIC).baseUrl("https://www.google.fr")//
+                .cacheManager(cacheManager).build();
+
+        GoogleApi create = build.create(GoogleApi.class);
+
+        for (int i = 0; i < 10; i++) {
+            create.searchCached("estivate");
+            Thread.sleep(1 * 1000);
+        }
+
+        String stats = create.searchCached("estivate").getResultStatistics();
+
+        log.info("Statistics [{}]", stats);
+
+        this.assertNotEmpty(stats);
     }
 
     @Test
@@ -154,9 +204,9 @@ public class Futurefit2Test {
         log.info("Statistics [{}]", response);
     }
 
-    private void assertNotEmpty(String sentence) {
-        TestCase.assertNotNull(sentence);
-        Assert.assertNotEquals("", sentence.trim());
+    public static void assertNotEmpty(String sentence) {
+        assertNotNull(sentence);
+        assertNotEquals("", sentence.trim());
     }
 
     public static class GoogleInterceptor implements MethodInterceptor {
@@ -203,7 +253,7 @@ public class Futurefit2Test {
     }
 
     @Data
-    public static class Page {
+    public static class Page implements Serializable {
         // get the div holding statistics
         @Select("#result-stats")
         @Text

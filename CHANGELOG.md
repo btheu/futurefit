@@ -1,5 +1,12 @@
 
-## 0.3.2-SNAPSHOT - pending
+## 0.4.0-SNAPSHOT - pending
+
+*	add internal cache manager definition
+*	add cache manager provider interface
+*	add spring framework cache manager support
+*	build: support jdk-17
+*	build: update dependencies
+*	test: update to junit5
 
 ## 0.3.1 - 2021-01-22
 

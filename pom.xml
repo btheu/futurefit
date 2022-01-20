@@ -7,7 +7,7 @@
 	</parent>
 	<groupId>com.github.btheu.futurefit2</groupId>
 	<artifactId>futurefit</artifactId>
-	<version>0.4.0-RC-SNAPSHOT</version>
+	<version>0.4.0</version>
 	<url>http://github.com/btheu/futurefit/</url>
 	<inceptionYear>2016</inceptionYear>
 	<description>An extension of the great retrofit</description>

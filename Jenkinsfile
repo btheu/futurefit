@@ -15,7 +15,7 @@ node('slave-build') {
     def rule = tools.findRule(env.BRANCH_NAME,rules)
     def context = [:]
 
-    context['COMPILE_MVN_IMAGE']  = 'maven:3.8-eclipse-temurin-17'
+    context['COMPILE_MVN_IMAGE']  = 'maven:3.8-openjdk-17'
 
     if(rule.TYPE == 'RELEASE'){
       context['DEPLOY_MVN_TARGET'] = 'clean deploy'

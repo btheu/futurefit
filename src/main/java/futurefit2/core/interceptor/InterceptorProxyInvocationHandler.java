@@ -92,6 +92,11 @@ public class InterceptorProxyInvocationHandler<T> implements InvocationHandler {
         }
 
         @Override
+        public String baseUrl() {
+            return baseUrl;
+        }
+
+        @Override
         public Method method() {
             return method;
         }

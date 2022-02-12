@@ -1,5 +1,6 @@
 package futurefit2;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.function.Consumer;
@@ -50,7 +51,7 @@ public class EhCacheTest {
 
         Cache<Object, Object> cache = cacheManager.getCache("sample", Object.class, Object.class);
 
-        Key build = new Key(GoogleApi.class.getMethod("searchCached", String.class), new Object[] { "estivate" });
+        Key keyA = new Key("baseUrlA", GoogleApi.class.getMethod("searchCached", String.class), new Object[] { "estivate" });
 
         Page value = new Page();
         value.setResultStatistics("test-stats-42");
@@ -61,13 +62,17 @@ public class EhCacheTest {
                 log.info("hv {} => {}", t.getKey().toString(), t.getValue().toString());
             }
         });
-        if (cache.containsKey(build)) {
-            log.info("was already there ! {}", cache.get(build));
+        if (cache.containsKey(keyA)) {
+            log.info("was already there ! {}", cache.get(keyA));
         }
 
-        cache.put(build, value);
+        cache.put(keyA, value);
 
-        assertTrue(cache.containsKey(build));
+        assertTrue(cache.containsKey(keyA));
+
+        Key keyB = new Key("baseUrlB", GoogleApi.class.getMethod("searchCached", String.class), new Object[] { "estivate" });
+
+        assertFalse(cache.containsKey(keyB));
 
         cacheManager.close();
 
@@ -75,7 +80,7 @@ public class EhCacheTest {
 
         cache = cacheManager.getCache("sample", Object.class, Object.class);
 
-        assertTrue(cache.containsKey(build));
+        assertTrue(cache.containsKey(keyA));
     }
 
     @Test
@@ -99,7 +104,7 @@ public class EhCacheTest {
 
         Cache<Object, Object> cache = cacheManager.getCache("sample", Object.class, Object.class);
 
-        Key build = new Key(GoogleApi.class.getMethod("searchCached", String.class), new Object[] { "12", 12, "32" });
+        Key build = new Key("baseUrlA", GoogleApi.class.getMethod("searchCached", String.class), new Object[] { "12", 12, "32" });
 
         if (cache.containsKey(build)) {
             log.info("was already there ! {}", cache.get(build));

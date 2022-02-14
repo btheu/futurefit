@@ -1,5 +1,13 @@
 
-## 0.4.0-SNAPSHOT - pending
+## 0.4.2-SNAPSHOT - pending
+
+## 0.4.1 - 2022-02-14
+
+*	fix: add baseUrl in cache key hashing
+*	fix: add param & argument sep for key
+*	build: update dependencies
+
+## 0.4.0 - 2022-01-20
 
 *	add internal cache manager definition
 *	add cache manager provider interface

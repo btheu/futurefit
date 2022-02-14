@@ -35,7 +35,7 @@ public class DefaultCacheableInterceptor implements RequestInterceptor {
             String cacheName = findAnnotation.cache();
             Cache<Object, Object> cache = cacheManager.getCache(cacheName, Object.class, Object.class);
 
-            Key key = new Key(method, args);
+            Key key = new Key(invocation.baseUrl(), method, args);
 
             Object result;
             if (cache.hasKey(key)) {
@@ -66,17 +66,21 @@ public class DefaultCacheableInterceptor implements RequestInterceptor {
     public static class Key implements Serializable {
         private final List<Object> signature = new ArrayList<>();
 
-        public Key(Method method, Object[] args) {
+        public Key(String baseUrl, Method method, Object[] args) {
+            signature.add(baseUrl);
+            signature.add("%FUTUREFIT_SEP%");
             signature.add(method.getName());
             signature.add("%FUTUREFIT_SEP%");
             signature.add(method.getReturnType().getName());
             signature.add("%FUTUREFIT_SEP%");
             for (Class<?> paramType : method.getParameterTypes()) {
                 signature.add(paramType.getName());
+                signature.add("%FUTUREFIT_PARAM_SEP%");
             }
             signature.add("%FUTUREFIT_SEP%");
             for (Object arg : args) {
                 signature.add(arg);
+                signature.add("%FUTUREFIT_ARG_SEP%");
             }
         }
 

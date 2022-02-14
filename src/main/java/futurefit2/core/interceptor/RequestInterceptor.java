@@ -8,6 +8,8 @@ public interface RequestInterceptor {
 
     public static interface RequestInvocation {
 
+        String baseUrl();
+
         Object invoke();
 
         Method method();

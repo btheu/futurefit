@@ -66,7 +66,8 @@ public class DefaultCacheableInterceptor implements RequestInterceptor {
     public static class Key implements Serializable {
         private final List<Object> signature = new ArrayList<>();
 
-        public Key(String baseUrl, Method method, Object[] args) {
+        public Key(final String baseUrl, final Method method, final Object[] args) {
+            final Object[] arguments = (args == null ? new Object[0] : args);
             signature.add(baseUrl);
             signature.add("%FUTUREFIT_SEP%");
             signature.add(method.getName());
@@ -78,7 +79,7 @@ public class DefaultCacheableInterceptor implements RequestInterceptor {
                 signature.add("%FUTUREFIT_PARAM_SEP%");
             }
             signature.add("%FUTUREFIT_SEP%");
-            for (Object arg : args) {
+            for (Object arg : arguments) {
                 signature.add(arg);
                 signature.add("%FUTUREFIT_ARG_SEP%");
             }

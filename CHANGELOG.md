@@ -1,6 +1,9 @@
 
 ## 0.4.2-SNAPSHOT - pending
 
+*	fix: handle case when cached key/value are obsolete after refactoring
+*	fix: handle case when @Cacheable method have no argument
+
 ## 0.4.1 - 2022-02-14
 
 *	fix: add baseUrl in cache key hashing

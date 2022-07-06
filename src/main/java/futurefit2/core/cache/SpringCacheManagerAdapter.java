@@ -31,6 +31,11 @@ public class SpringCacheManagerAdapter implements CacheManager {
                 return cache.get(key) != null;
             }
 
+            @Override
+            public void remove(K key) {
+                cache.evictIfPresent(key);
+            }
+
         };
     }
 

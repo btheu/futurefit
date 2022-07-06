@@ -34,6 +34,11 @@ public class EhCacheCacheManagerAdapter implements CacheManager {
             public boolean hasKey(K key) {
                 return cache.containsKey(key);
             }
+
+            @Override
+            public void remove(K key) {
+                cache.remove(key);
+            }
         };
     }
 

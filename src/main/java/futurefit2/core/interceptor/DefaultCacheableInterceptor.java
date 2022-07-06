@@ -37,23 +37,31 @@ public class DefaultCacheableInterceptor implements RequestInterceptor {
 
             Key key = new Key(invocation.baseUrl(), method, args);
 
+            boolean hasKey;
+            try {
+                hasKey = cache.hasKey(key);
+            } catch (Throwable e) {
+                log.error("hasKey failed for {}, removing it", key);
+                cache.remove(key);
+                hasKey = false;
+            }
+
             Object result;
-            if (cache.hasKey(key)) {
+            if (hasKey) {
                 result = cache.get(key);
             } else {
                 result = invocation.invoke();
 
                 if (result == null) {
-                    throw new NullPointerException("Cache value is null for cache key: " + key);
+                    log.error("Cache value is null for cache key: {}", key);
+                } else {
+                    cache.put(key, result);
+
+                    if (cache.hasNoKey(key)) {
+                        log.error("something wrong happen with cache '{}' on method '{}'", //
+                                cacheName, method.toGenericString());
+                    }
                 }
-
-                cache.put(key, result);
-
-                if (cache.hasNoKey(key)) {
-                    log.error("something wrong happen with cache '{}' on method '{}'", //
-                            cacheName, method.toGenericString());
-                }
-
             }
             return result;
         }

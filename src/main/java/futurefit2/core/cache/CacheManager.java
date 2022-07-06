@@ -8,11 +8,14 @@ public interface CacheManager {
 
         void put(K key, V value);
 
+        void remove(K key);
+
         boolean hasKey(K key);
 
         default boolean hasNoKey(K key) {
             return !hasKey(key);
-        };
+        }
+
     }
 
     <K, V> Cache<K, V> getCache(String cacheName, Class<K> keyType, Class<V> valueType);

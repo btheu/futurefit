@@ -80,10 +80,12 @@ public class DefaultCacheableInterceptor implements RequestInterceptor {
             signature.add("%FUTUREFIT_SEP%");
             signature.add(method.getName());
             signature.add("%FUTUREFIT_SEP%");
-            signature.add(method.getReturnType().getName());
+            signature.add(method.toGenericString());
+            signature.add("%FUTUREFIT_SEP%");
+            signature.add(method.getReturnType().toGenericString());
             signature.add("%FUTUREFIT_SEP%");
             for (Class<?> paramType : method.getParameterTypes()) {
-                signature.add(paramType.getName());
+                signature.add(paramType.toGenericString());
                 signature.add("%FUTUREFIT_PARAM_SEP%");
             }
             signature.add("%FUTUREFIT_SEP%");

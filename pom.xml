@@ -11,7 +11,6 @@
 	<url>http://github.com/btheu/futurefit/</url>
 	<inceptionYear>2016</inceptionYear>
 	<description>An extension of the great retrofit</description>
-
 	<licenses>
 		<license>
 			<name>The MIT License</name>
@@ -19,12 +18,18 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
-
 	<issueManagement>
 		<system>GitHub</system>
 		<url>http://github.com/btheu/futurefit/issues</url>
 	</issueManagement>
-
+	<properties>
+		<java.version>17</java.version>
+		<resource.delimiter>@</resource.delimiter>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -55,7 +60,6 @@
 			<version>5.8.2</version>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
 			<artifactId>okhttp</artifactId>
@@ -66,7 +70,6 @@
 			<artifactId>okhttp-urlconnection</artifactId>
 			<version>4.10.0</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.squareup.retrofit2</groupId>
 			<artifactId>retrofit</artifactId>
@@ -82,7 +85,6 @@
 			<artifactId>converter-gson</artifactId>
 			<version>2.9.0</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.github.btheu.estivate</groupId>
 			<artifactId>estivate</artifactId>
@@ -110,16 +112,13 @@
 			<version>5.3.15</version>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
 			<artifactId>caffeine</artifactId>
 			<version>3.0.5</version>
 			<scope>test</scope>
 		</dependency>
-
 	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -128,13 +127,12 @@
 				<version>3.8.1</version>
 				<configuration>
 					<encoding>UTF-8</encoding>
-					<release>17</release>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.3.1</version>
+				<version>3.4.1</version>
 				<configuration>
 					<failOnError>false</failOnError>
 				</configuration>
@@ -152,7 +150,6 @@
 			</plugin>
 		</plugins>
 	</build>
-
 	<developers>
 		<developer>
 			<id>btheu</id>
@@ -164,5 +161,4 @@
 			<timezone>+1</timezone>
 		</developer>
 	</developers>
-
 </project>

@@ -41,7 +41,12 @@ public class DefaultCacheableInterceptor implements RequestInterceptor {
             try {
                 hasKey = cache.hasKey(key);
             } catch (Throwable e) {
-                log.error("hasKey failed for {}, removing it", key);
+                if (e.getClass().getCanonicalName().contains("SerializationException")) {
+                    log.error("deserialization failed for {}, removing it", key);
+                } else {
+                    log.error("hasKey failed for {}, removing it", key);
+                }
+                log.debug(e.getMessage(), e);
                 cache.remove(key);
                 hasKey = false;
             }

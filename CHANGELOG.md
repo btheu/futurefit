@@ -4,6 +4,7 @@
 *	fix: handle case when cached key/value are obsolete after refactoring
 *	fix: handle case when @Cacheable method have no argument
 *	fix: handle generic return type for cache key
+*	build: update dependencies
 
 ## 0.4.1 - 2022-02-14
 

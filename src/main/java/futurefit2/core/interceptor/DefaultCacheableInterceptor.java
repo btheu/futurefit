@@ -37,23 +37,37 @@ public class DefaultCacheableInterceptor implements RequestInterceptor {
 
             Key key = new Key(invocation.baseUrl(), method, args);
 
+            boolean hasKey;
+            try {
+                hasKey = cache.hasKey(key);
+            } catch (Throwable e) {
+                if (e.getClass().getCanonicalName().contains("SerializationException")) {
+                    log.error("deserialization failed for {}, removing it", key);
+                } else {
+                    log.error("hasKey failed for {}, removing it", key);
+                    log.error(e.getMessage(), e);
+                }
+                log.debug(e.getMessage(), e);
+                cache.remove(key);
+                hasKey = false;
+            }
+
             Object result;
-            if (cache.hasKey(key)) {
+            if (hasKey) {
                 result = cache.get(key);
             } else {
                 result = invocation.invoke();
 
                 if (result == null) {
-                    throw new NullPointerException("Cache value is null for cache key: " + key);
+                    log.error("Cache value is null for cache key: {}", key);
+                } else {
+                    cache.put(key, result);
+
+                    if (cache.hasNoKey(key)) {
+                        log.error("something wrong happen with cache '{}' on method '{}'", //
+                                cacheName, method.toGenericString());
+                    }
                 }
-
-                cache.put(key, result);
-
-                if (cache.hasNoKey(key)) {
-                    log.error("something wrong happen with cache '{}' on method '{}'", //
-                            cacheName, method.toGenericString());
-                }
-
             }
             return result;
         }
@@ -66,19 +80,22 @@ public class DefaultCacheableInterceptor implements RequestInterceptor {
     public static class Key implements Serializable {
         private final List<Object> signature = new ArrayList<>();
 
-        public Key(String baseUrl, Method method, Object[] args) {
+        public Key(final String baseUrl, final Method method, final Object[] args) {
+            final Object[] arguments = (args == null ? new Object[0] : args);
             signature.add(baseUrl);
             signature.add("%FUTUREFIT_SEP%");
             signature.add(method.getName());
             signature.add("%FUTUREFIT_SEP%");
-            signature.add(method.getReturnType().getName());
+            signature.add(method.toGenericString());
+            signature.add("%FUTUREFIT_SEP%");
+            signature.add(method.getReturnType().toGenericString());
             signature.add("%FUTUREFIT_SEP%");
             for (Class<?> paramType : method.getParameterTypes()) {
-                signature.add(paramType.getName());
+                signature.add(paramType.toGenericString());
                 signature.add("%FUTUREFIT_PARAM_SEP%");
             }
             signature.add("%FUTUREFIT_SEP%");
-            for (Object arg : args) {
+            for (Object arg : arguments) {
                 signature.add(arg);
                 signature.add("%FUTUREFIT_ARG_SEP%");
             }

@@ -17,7 +17,7 @@ node('slave-build') {
 
     context['COMPILE_MVN_IMAGE']  = 'maven:3.8-openjdk-17'
 
-    if(rule.TYPE == 'RELEASE'){
+    if(rule.TYPE in ['RELEASE','RELEASE_CANDIDATE'] ){
       context['DEPLOY_MVN_TARGET'] = 'clean deploy'
       context['DEPLOY_MVN_PROFILE'] = '-P sonatype-oss-release -P estivate'
     }

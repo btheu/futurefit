@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.ehcache.CacheManager;
@@ -93,7 +94,7 @@ public class Futurefit2Test {
         for (int i = 0; i < 4; i++) {
             String stats = create.searchDirect("estivate").getResultStatistics();
 
-            this.assertNotEmpty(stats);
+            assertNotEmpty(stats);
 
             log.info("Statistics [{}]", stats);
         }
@@ -131,7 +132,7 @@ public class Futurefit2Test {
 
         String stats = create.searchCached("estivate").getResultStatistics();
 
-        this.assertNotEmpty(stats);
+        assertNotEmpty(stats);
 
         log.info("Statistics [{}]", stats);
     }
@@ -156,7 +157,25 @@ public class Futurefit2Test {
 
         log.info("Statistics [{}]", stats);
 
-        this.assertNotEmpty(stats);
+        assertNotEmpty(stats);
+    }
+
+    @Test
+    @SneakyThrows
+    public void testCacheWithGenericsReturn() {
+
+        CacheManager cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build();
+
+        Futurefit build = new Futurefit.Builder().log(Level.BASIC).baseUrl("https://www.google.fr")//
+                .cacheManager(cacheManager).build();
+
+        GoogleApi create = build.create(GoogleApi.class);
+
+        create.searchTitleCached("estivate", "key2");
+
+        List<Title> searchTitleCached = create.searchTitleCached("estivate", "key2");
+
+        log.info("resultat [{}]", searchTitleCached);
     }
 
     @Test
@@ -168,7 +187,7 @@ public class Futurefit2Test {
 
         String stats = create.search("estivate").execute().body().getResultStatistics();
 
-        this.assertNotEmpty(stats);
+        assertNotEmpty(stats);
 
         log.info("Statistics [{}]", stats);
     }
@@ -184,7 +203,7 @@ public class Futurefit2Test {
 
         String stats = create.searchDirect("estivate").getResultStatistics();
 
-        this.assertNotEmpty(stats);
+        assertNotEmpty(stats);
 
         log.info("Statistics [{}]", stats);
     }
@@ -242,6 +261,12 @@ public class Futurefit2Test {
         @Headers({ "User-Agent:Mozilla/5.0 Firefox/68.0" })
         public Page searchCached(@Query("q") String query, @Query("q2") String query2);
 
+        @Estivate
+        @Cacheable(cache = "google", duration = "PT5S")
+        @GET("/search?hl=en&safe=off")
+        @Headers({ "User-Agent:Mozilla/5.0 Firefox/68.0" })
+        public List<Title> searchTitleCached(@Query("q") String query, @Query("q2") String query2);
+
         @GET("/search?hl=en&safe=off")
         @Headers({ "User-Agent:Mozilla/5.0 Firefox/68.0" })
         public ResponseBody searchResponse(@Query("q") String query);
@@ -253,11 +278,22 @@ public class Futurefit2Test {
     }
 
     @Data
+    @SuppressWarnings("serial")
     public static class Page implements Serializable {
         // get the div holding statistics
         @Select("#result-stats")
         @Text
         public String resultStatistics;
+    }
+
+    @Data
+    @Select("h3")
+    @SuppressWarnings("serial")
+    public static class Title implements Serializable {
+
+        @Text
+        String title;
+
     }
 
     @SuppressWarnings("serial")

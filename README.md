@@ -36,6 +36,6 @@ An extention of the great Retrofit with integration of <a href="https://github.c
 <dependency>
     <groupId>com.github.btheu.futurefit2</groupId>
     <artifactId>futurefit</artifactId>
-    <version>0.4.1</version>
+    <version>0.4.3</version>
 </dependency>
 ```

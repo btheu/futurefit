@@ -1,7 +1,11 @@
 
-## 0.4.3-SNAPSHOT - pending
+## 0.4.4-SNAPSHOT - pending
 
 
+## 0.4.3 - 2023-12-14
+
+*	fix: handle any cache access failures
+*	build: update dependencies
 
 ## 0.4.2 - 2023-09-29
 

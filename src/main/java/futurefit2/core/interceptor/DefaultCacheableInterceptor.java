@@ -40,15 +40,19 @@ public class DefaultCacheableInterceptor implements RequestInterceptor {
             boolean hasKey;
             try {
                 hasKey = cache.hasKey(key);
-            } catch (Throwable e) {
-                if (e.getClass().getCanonicalName().contains("SerializationException")) {
+            } catch (Throwable e1) {
+                if (e1.getClass().getCanonicalName().contains("SerializationException")) {
                     log.error("deserialization failed for {}, removing it", key);
                 } else {
                     log.error("hasKey failed for {}, removing it", key);
-                    log.error(e.getMessage(), e);
+                    log.error(e1.getMessage(), e1);
                 }
-                log.debug(e.getMessage(), e);
-                cache.remove(key);
+                log.debug(e1.getMessage(), e1);
+                try {
+                    cache.remove(key);
+                } catch (Throwable e2) {
+                    log.error("remove errored key failed, message={}", e2.getMessage());
+                }
                 hasKey = false;
             }
 
@@ -61,11 +65,15 @@ public class DefaultCacheableInterceptor implements RequestInterceptor {
                 if (result == null) {
                     log.error("Cache value is null for cache key: {}", key);
                 } else {
-                    cache.put(key, result);
+                    try {
+                        cache.put(key, result);
 
-                    if (cache.hasNoKey(key)) {
-                        log.error("something wrong happen with cache '{}' on method '{}'", //
-                                cacheName, method.toGenericString());
+                        if (cache.hasNoKey(key)) {
+                            log.error("something wrong happen with cache '{}' on method '{}'", //
+                                    cacheName, method.toGenericString());
+                        }
+                    } catch (Throwable t) {
+                        log.error("cant put in cache data message={}", t.getMessage());
                     }
                 }
             }

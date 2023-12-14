@@ -5,6 +5,7 @@
 ## 0.4.3 - 2023-12-14
 
 *	fix: handle any cache access failures
+*	build: update dependencies
 
 ## 0.4.2 - 2023-09-29
 
